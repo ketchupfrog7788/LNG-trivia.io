@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LNG每日問答</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141210;
+    --ink-2:#1f1a13;
+    --paper:#fff4dc;
+    --paper-2:#f7e6bd;
+    --brass:#ffb800;
+    --brass-dim:#b37f00;
+    --correct:#6b7f1f;
+    --correct-dim:#dfe3c2;
+    --wrong:#e0561a;
+    --wrong-dim:#f7d3bd;
+    --ink-text:#241d12;
+    --muted:#7a7261;
+    --line: rgba(255,244,220,0.14);
+    --serif: 'Playfair Display', 'Noto Serif TC', serif;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Noto Sans TC', 'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(255,184,0,0.10), transparent 55%),
+      radial-gradient(ellipse at 100% 100%, rgba(107,127,31,0.08), transparent 50%),
+      var(--ink);
+    color: var(--paper);
+    font-family: var(--sans);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 32px 16px 80px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 28px;
+    color: var(--paper);
+  }
+  .brand .mark{
+    width:28px;height:28px;border:1.5px solid var(--brass);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono); font-size:12px; color:var(--brass);
+    transform: rotate(-4deg);
+  }
+  .brand h1{
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight:700;
+    letter-spacing: 0.04em;
+    margin:0;
+  }
+  .stage{
+    width:100%;
+    max-width: 560px;
+  }
+
+  /* ---------- Start screen ---------- */
+  .panel{
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 36px 30px;
+    position:relative;
+  }
+  .panel::before{
+    content:"";
+    position:absolute; inset:8px;
+    border:1px dashed rgba(255,244,220,0.10);
+    border-radius:4px;
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--brass);
+    text-transform: uppercase;
+    margin: 0 0 10px;
+  }
+  .panel h2{
+    font-family: var(--serif);
+    font-size: 26px;
+    line-height:1.3;
+    margin: 0 0 6px;
+  }
+  .panel p.desc{
+    color:#c6c8d4;
+    font-size:14px;
+    line-height:1.7;
+    margin: 0 0 26px;
+  }
+  .count-grid{
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:10px;
+    margin-bottom: 8px;
+  }
+  .count-btn{
+    font-family: var(--mono);
+    font-size:15px;
+    color: var(--paper);
+    background: transparent;
+    border: 1px solid rgba(255,244,220,0.22);
+    border-radius: 4px;
+    padding: 14px 8px;
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .count-btn:hover{ border-color: var(--brass); color: var(--brass); }
+  .count-btn:focus-visible{ outline: 2px solid var(--brass); outline-offset:2px; }
+  .count-btn.disabled{ opacity:.35; cursor:not-allowed; }
+  .count-btn.disabled:hover{ border-color: rgba(255,244,220,0.22); color:var(--paper); }
+  .pool-note{
+    font-family: var(--mono);
+    font-size:11.5px;
+    color: var(--muted);
+    margin: 14px 0 24px;
+  }
+  .loading-note{
+    font-family: var(--mono);
+    font-size:13px;
+    color: var(--brass);
+    margin: 4px 0 22px;
+  }
+  .error-note{
+    font-family: var(--mono);
+    font-size:12.5px;
+    line-height:1.8;
+    color: var(--wrong);
+    margin: 4px 0 22px;
+  }
+  .retry-btn{
+    margin-top:10px;
+    font-family: var(--sans);
+    font-weight:600;
+    font-size:13px;
+    color: var(--ink);
+    background: var(--brass);
+    border:none;
+    border-radius: 4px;
+    padding: 9px 18px;
+    cursor:pointer;
+  }
+  .retry-btn:hover{ background:#ffcf47; }
+  .start-btn{
+    width:100%;
+    font-family: var(--sans);
+    font-weight:600;
+    font-size:15px;
+    color: var(--ink);
+    background: var(--brass);
+    border:none;
+    border-radius: 4px;
+    padding: 15px;
+    cursor:pointer;
+    letter-spacing: 0.02em;
+    transition: transform .12s ease, background .15s ease;
+  }
+  .start-btn:hover{ background:#ddb63a; }
+  .start-btn:active{ transform: scale(0.99); }
+  .start-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .start-btn:focus-visible{ outline: 2px solid var(--paper); outline-offset:2px; }
+
+  /* ---------- Quiz header ---------- */
+  .quiz-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom: 14px;
+    padding: 0 2px;
+  }
+  .progress-track{
+    flex:1;
+    height:3px;
+    background: rgba(255,244,220,0.14);
+    margin: 0 14px;
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background: var(--brass);
+    transition: width .3s ease;
+  }
+  .stat{
+    font-family: var(--mono);
+    font-size:12px;
+    color: var(--paper);
+    white-space:nowrap;
+  }
+  .stat .num{ color:var(--brass); }
+
+  /* ---------- Card ---------- */
+  .card-wrap{
+    perspective: 1600px;
+    margin-bottom: 22px;
+  }
+  .card{
+    position:relative;
+    width:100%;
+    min-height: 340px;
+    cursor:pointer;
+    transform-style: preserve-3d;
+    transition: transform .55s cubic-bezier(.2,.8,.2,1);
+  }
+  .card.flipped{ transform: rotateY(180deg); }
+  .card:focus-visible{ outline: 2px solid var(--brass); outline-offset: 4px; }
+  .face{
+    position:absolute; inset:0;
+    backface-visibility: hidden;
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink-text);
+    padding: 26px 26px 22px;
+    display:flex;
+    flex-direction:column;
+    box-shadow: 0 18px 40px -14px rgba(0,0,0,0.55), 0 2px 0 rgba(0,0,0,0.15);
+    border: 1px solid var(--paper-2);
+  }
+  .face::before{
+    content:"";
+    position:absolute; left:22px; top:22px; right:22px; bottom:22px;
+    border: 1px solid rgba(34,36,47,0.08);
+    border-radius:4px;
+    pointer-events:none;
+  }
+  .face-front{ justify-content:space-between; }
+  .face-back{ transform: rotateY(180deg); justify-content:flex-start; }
+
+  .card-index{
+    position:absolute; top:14px; left:16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--brass-dim);
+    background: rgba(255,184,0,0.10);
+    border:1px solid rgba(255,184,0,0.35);
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing:0.05em;
+  }
+  .qmark{
+    position:absolute; top:12px; right:18px;
+    font-family: var(--serif);
+    font-size: 46px;
+    color: rgba(34,36,47,0.08);
+    font-style:italic;
+  }
+  .q-body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:1;
+    text-align:center;
+    padding: 30px 6px 10px;
+  }
+  .q-text{
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height:1.55;
+    font-weight:600;
+    white-space: pre-line;
+  }
+  .flip-hint{
+    text-align:center;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform:uppercase;
+  }
+
+  .a-label{
+    font-family: var(--mono);
+    font-size:10.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color: var(--brass-dim);
+    margin: 18px 0 8px;
+  }
+  .a-text{
+    font-family: var(--sans);
+    font-size: 15.5px;
+    line-height:1.75;
+    color: var(--ink-text);
+    flex:1;
+    white-space: pre-line;
+  }
+  .a-source-block{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    margin-top:14px;
+  }
+  .a-timestamp{
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    margin: 0 0 4px;
+  }
+  .a-source{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--wrong);
+    text-decoration:none;
+    border-bottom: 1px solid transparent;
+  }
+  .a-source:hover{ border-bottom-color: var(--wrong); }
+  .a-source svg{ flex-shrink:0; }
+
+  /* ---------- Judge buttons ---------- */
+  .judge-row{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+    min-height: 54px;
+  }
+  .judge-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-family: var(--sans);
+    font-weight:600;
+    font-size:14px;
+    border-radius: 5px;
+    padding: 14px;
+    cursor:pointer;
+    border: 1.5px solid;
+    background: transparent;
+    transition: transform .1s ease, background .15s ease;
+  }
+  .judge-btn:active{ transform: scale(0.98); }
+  .judge-btn:focus-visible{ outline: 2px solid var(--paper); outline-offset:2px; }
+  .judge-correct{ color: var(--correct); border-color: var(--correct); }
+  .judge-correct:hover{ background: rgba(107,127,31,0.14); }
+  .judge-wrong{ color: var(--wrong); border-color: var(--wrong); }
+  .judge-wrong:hover{ background: rgba(224,86,26,0.14); }
+  .judge-btn.chosen-correct{ background: var(--correct); color: var(--ink); }
+  .judge-btn.chosen-wrong{ background: var(--wrong); color: var(--paper); }
+  .judge-placeholder{
+    grid-column: 1 / -1;
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  .bottom-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+  }
+  .accuracy{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--paper);
+  }
+  .accuracy .val{ color: var(--brass); font-size:15px; font-weight:600; }
+  .next-btn{
+    font-family: var(--sans);
+    font-weight:600;
+    font-size:14px;
+    color: var(--ink);
+    background: var(--paper);
+    border:none;
+    border-radius: 4px;
+    padding: 11px 22px;
+    cursor:pointer;
+    opacity:.35;
+    pointer-events:none;
+    transition: opacity .15s ease;
+  }
+  .next-btn.active{ opacity:1; pointer-events:auto; }
+  .next-btn:hover.active{ background: var(--brass); }
+  .next-btn:focus-visible{ outline: 2px solid var(--brass); outline-offset:2px; }
+
+  /* ---------- Result screen ---------- */
+  .result-stamp{
+    text-align:center;
+    padding: 10px 0 6px;
+  }
+  .result-stamp .big{
+    font-family: var(--serif);
+    font-size: 54px;
+    font-weight:700;
+    color: var(--brass);
+    line-height:1;
+  }
+  .result-stamp .sub{
+    font-family: var(--mono);
+    font-size: 13px;
+    color: #c6c8d4;
+    margin-top:10px;
+  }
+  .result-row{
+    display:flex;
+    gap:10px;
+    margin-top:28px;
+  }
+  .ghost-btn{
+    flex:1;
+    font-family: var(--sans);
+    font-weight:600;
+    font-size:14px;
+    color: var(--paper);
+    background: transparent;
+    border: 1px solid rgba(255,244,220,0.3);
+    border-radius: 4px;
+    padding: 13px;
+    cursor:pointer;
+  }
+  .ghost-btn:hover{ border-color: var(--brass); color: var(--brass); }
+  .ghost-btn:focus-visible{ outline: 2px solid var(--brass); outline-offset:2px; }
+
+  @media (max-width:480px){
+    .panel{ padding: 28px 20px; }
+    .q-text{ font-size:19px; }
+    .card{ min-height: 380px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .card, .progress-fill, .next-btn, .judge-btn{ transition:none !important; }
+  }
+  [hidden]{ display:none !important; }
+
+  .site-footer{
+    width:100%;
+    max-width: 560px;
+    margin: 40px auto 0;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+  .site-footer p{
+    font-family: var(--mono);
+    font-size: 22px;
+    line-height: 1.8;
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+  .site-footer p:last-child{ margin-bottom:0; }
+  @media (max-width:480px){
+    .site-footer{ padding: 22px 4px 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="brand">
+  <div class="mark">?</div>
+  <h1>LNG每日問答</h1>
+</div>
+
+<div class="stage">
+
+  <!-- ============ START SCREEN ============ -->
+  <section class="panel" id="start-screen">
+    <p class="eyebrow">Round Setup · 開始一輪</p>
+    <h2>今天想挑戰幾題?</h2>
+    <p class="desc">系統會從題庫中隨機抽取並打亂順序，翻牌看答案、自行判斷答對或答錯，即時計算正確率。</p>
+
+    <p class="loading-note" id="loading-note">正在載入最新題庫…</p>
+    <p class="error-note" id="error-note" hidden>題庫載入失敗，請檢查網路連線，或確認試算表仍為「發布到網路」狀態。<br><button class="retry-btn" id="retry-btn">重新載入</button></p>
+
+    <div class="count-grid" id="count-grid" hidden>
+      <button class="count-btn" data-count="5">5 題</button>
+      <button class="count-btn" data-count="10">10 題</button>
+      <button class="count-btn" data-count="20">20 題</button>
+      <button class="count-btn" data-count="50">50 題</button>
+      <button class="count-btn" data-count="100">100 題</button>
+      <button class="count-btn" data-count="all">全部題庫</button>
+    </div>
+    <p class="pool-note" id="pool-note" hidden>題庫目前共 <span id="pool-size">0</span> 題</p>
+    <button class="start-btn" id="start-btn" disabled hidden>選擇題數以開始</button>
+  </section>
+
+  <!-- ============ QUIZ SCREEN ============ -->
+  <section id="quiz-screen" hidden>
+    <div class="quiz-head">
+      <span class="stat">第 <span class="num" id="q-current">1</span> / <span id="q-total">10</span> 題</span>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <div class="card-wrap">
+      <div class="card" id="card" tabindex="0" role="button" aria-label="點擊翻牌查看答案">
+        <div class="face face-front">
+          <span class="card-index" id="card-index-front">NO. 001</span>
+          <span class="qmark">Q</span>
+          <div class="q-body"><p class="q-text" id="q-text"></p></div>
+          <p class="flip-hint">點卡片翻面看答案</p>
+        </div>
+        <div class="face face-back">
+          <span class="card-index" id="card-index-back">NO. 001</span>
+          <p class="a-label">答案</p>
+          <p class="a-text" id="a-text"></p>
+          <div class="a-source-block">
+            <p class="a-timestamp" id="a-timestamp" hidden></p>
+            <a class="a-source" id="a-source" href="#" target="_blank" rel="noopener noreferrer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2c-.3-1.1-1.1-1.9-2.1-2.2C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.5c-1 .3-1.8 1.1-2.1 2.2C0 8.1 0 12 0 12s0 3.9.5 5.8c.3 1.1 1.1 1.9 2.1 2.2 1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5c1-.3 1.8-1.1 2.1-2.2.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
+              資料出處（YouTube）
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="judge-row" id="judge-row">
+      <p class="judge-placeholder" id="judge-placeholder">翻牌後即可標記這題答對還是答錯</p>
+    </div>
+
+    <div class="bottom-row">
+      <span class="accuracy">目前正確率 <span class="val" id="accuracy-val">—</span></span>
+      <button class="next-btn" id="next-btn">下一題 →</button>
+    </div>
+  </section>
+
+  <!-- ============ RESULT SCREEN ============ -->
+  <section class="panel" id="result-screen" hidden>
+    <p class="eyebrow">Round Complete · 本輪結束</p>
+    <div class="result-stamp">
+      <div class="big" id="result-rate">0%</div>
+      <p class="sub" id="result-detail">答對 0／共 0 題</p>
+    </div>
+    <div class="result-row">
+      <button class="ghost-btn" id="retry-same">再玩一次</button>
+      <button class="ghost-btn" id="back-to-start">重新選擇題數</button>
+    </div>
+  </section>
+
+</div>
+
+<footer class="site-footer">
+  <p>此網站並非LNG的官方網站，而是由在thread上進行「LNG每日知識問答」的thread帳號 ketchupfrog7788 運用vibe codinng建立，方便各位LNG粉絲進行知識問答、與朋友同樂。</p>
+  <p>大部分在thread上出過的題目，都會更新到這個網站的資料庫哩，但不會即時更新，應該是我想到才會更新。想要每天中午12:30參與最新的問答，歡迎大家還是去追蹤我的thread帳號 ketchupfrog7788</p>
+</footer>
+
+<script>
+/* =========================================================
+   題庫來源：Google 試算表（發布為 CSV）
+   欄位需求：第一列標題為「題目」「答案」「連結」
+   之後要新增/修改題目，直接編輯試算表即可，網頁會自動讀取最新內容。
+   ========================================================= */
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYys23lt7g7pEBBGWiobb5z175NUyBAMYc8gfW2dHB3uDYgUoHNFHUzXsPcW8_P3RcujUzd78te0gT/pub?gid=0&single=true&output=csv";
+
+let QUESTION_BANK = [];
+
+// 標準 CSV 解析器：支援欄位內含逗號、換行、雙引號跳脫（"" 代表一個引號）
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const next = text[i + 1];
+    if (inQuotes) {
+      if (ch === '"' && next === '"') { field += '"'; i++; }
+      else if (ch === '"') { inQuotes = false; }
+      else { field += ch; }
+    } else {
+      if (ch === '"') { inQuotes = true; }
+      else if (ch === ',') { row.push(field); field = ''; }
+      else if (ch === '\r') { /* 忽略，交給 \n 處理換行 */ }
+      else if (ch === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else { field += ch; }
+    }
+  }
+  if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+// 從「連結」欄位（可能混雜時間戳記文字，例如 "23:30\nhttps://..."）
+// 拆出真正的網址，以及網址以外剩下的時間戳記文字
+function extractSourceParts(text) {
+  if (!text) return { url: '', timestamp: '' };
+  const match = text.match(/https?:\/\/\S+/);
+  const url = match ? match[0] : '';
+  const timestamp = text.replace(url, '').trim();
+  return { url, timestamp };
+}
+
+function csvToQuestionBank(csvText) {
+  const rows = parseCSV(csvText).filter(r => r.some(cell => cell.trim() !== ''));
+  if (rows.length < 2) return [];
+  const header = rows[0].map(h => h.trim());
+  const qIdx = header.findIndex(h => ['題目', '問題', 'q', 'question'].includes(h.toLowerCase()));
+  const aIdx = header.findIndex(h => ['答案', 'a', 'answer'].includes(h.toLowerCase()));
+  const sIdx = header.findIndex(h => ['連結', '出處', '來源', 'source', 'link'].includes(h.toLowerCase()));
+
+  const bank = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const q = (qIdx >= 0 ? r[qIdx] : '')?.trim();
+    const a = (aIdx >= 0 ? r[aIdx] : '')?.trim();
+    const { url: source, timestamp } = extractSourceParts(sIdx >= 0 ? r[sIdx] : '');
+    if (!q || !a) continue;
+    bank.push({ q, a, source, timestamp });
+  }
+  return bank;
+}
+
+/* =========================================================
+   狀態與邏輯
+   ========================================================= */
+let roundQuestions = [];
+let currentIndex = 0;
+let correctCount = 0;
+let answeredCount = 0;
+let currentAnswered = false;
+let lastRoundCount = 10;
+
+const poolSizeEl = document.getElementById('pool-size');
+const loadingNote = document.getElementById('loading-note');
+const errorNote = document.getElementById('error-note');
+const countGrid = document.getElementById('count-grid');
+const poolNote = document.getElementById('pool-note');
+const startBtn = document.getElementById('start-btn');
+let selectedCount = null;
+
+function setupCountButtons() {
+  [...countGrid.querySelectorAll('.count-btn')].forEach(btn => {
+    btn.classList.remove('disabled');
+    btn.disabled = false;
+    btn.style.background = 'transparent';
+    const c = btn.dataset.count;
+    if (c !== 'all' && parseInt(c, 10) > QUESTION_BANK.length) {
+      btn.classList.add('disabled');
+      btn.disabled = true;
+    }
+  });
+}
+
+[...countGrid.querySelectorAll('.count-btn')].forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    countGrid.querySelectorAll('.count-btn').forEach(b => b.style.background = 'transparent');
+    btn.style.background = 'rgba(255,184,0,0.16)';
+    btn.style.borderColor = 'var(--brass)';
+    btn.style.color = 'var(--brass)';
+    selectedCount = btn.dataset.count;
+    startBtn.disabled = false;
+    startBtn.textContent = '開始作答 →';
+  });
+});
+
+async function loadQuestionBank() {
+  loadingNote.hidden = false;
+  errorNote.hidden = true;
+  countGrid.hidden = true;
+  poolNote.hidden = true;
+  startBtn.hidden = true;
+
+  try {
+    const res = await fetch(SHEET_CSV_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const csvText = await res.text();
+    const bank = csvToQuestionBank(csvText);
+    if (bank.length === 0) throw new Error('題庫是空的');
+
+    QUESTION_BANK = bank;
+    poolSizeEl.textContent = QUESTION_BANK.length;
+    setupCountButtons();
+
+    loadingNote.hidden = true;
+    countGrid.hidden = false;
+    poolNote.hidden = false;
+    startBtn.hidden = false;
+  } catch (err) {
+    loadingNote.hidden = true;
+    errorNote.hidden = false;
+    console.error('題庫載入失敗：', err);
+  }
+}
+
+document.getElementById('retry-btn').addEventListener('click', loadQuestionBank);
+loadQuestionBank();
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+startBtn.addEventListener('click', () => {
+  if (!selectedCount) return;
+  const n = selectedCount === 'all' ? QUESTION_BANK.length : Math.min(parseInt(selectedCount, 10), QUESTION_BANK.length);
+  lastRoundCount = selectedCount;
+  roundQuestions = shuffle(QUESTION_BANK).slice(0, n);
+  currentIndex = 0;
+  correctCount = 0;
+  answeredCount = 0;
+  document.getElementById('start-screen').hidden = true;
+  document.getElementById('result-screen').hidden = true;
+  document.getElementById('quiz-screen').hidden = false;
+  renderCurrentQuestion();
+});
+
+const card = document.getElementById('card');
+const qText = document.getElementById('q-text');
+const aText = document.getElementById('a-text');
+const aSource = document.getElementById('a-source');
+const aTimestamp = document.getElementById('a-timestamp');
+const cardIndexFront = document.getElementById('card-index-front');
+const cardIndexBack = document.getElementById('card-index-back');
+const qCurrent = document.getElementById('q-current');
+const qTotal = document.getElementById('q-total');
+const progressFill = document.getElementById('progress-fill');
+const judgeRow = document.getElementById('judge-row');
+const nextBtn = document.getElementById('next-btn');
+const accuracyVal = document.getElementById('accuracy-val');
+
+// 把試算表格子裡打的字面 "\n"（反斜線加 n）換成真正的換行字元，
+// 這樣不管是用 Alt+Enter 打的真換行，還是手動打 \n，畫面上都會正確換行。
+function normalizeLineBreaks(text) {
+  if (typeof text !== 'string') return text;
+  return text.replace(/\\n/g, '\n');
+}
+
+function renderCurrentQuestion() {
+  currentAnswered = false;
+  card.classList.remove('flipped');
+  const item = roundQuestions[currentIndex];
+  const label = 'NO. ' + String(currentIndex + 1).padStart(3, '0');
+  cardIndexFront.textContent = label;
+  cardIndexBack.textContent = label;
+  qText.textContent = normalizeLineBreaks(item.q);
+  aText.textContent = normalizeLineBreaks(item.a);
+  aSource.href = item.source;
+  if (item.timestamp) {
+    aTimestamp.textContent = item.timestamp;
+    aTimestamp.hidden = false;
+  } else {
+    aTimestamp.hidden = true;
+  }
+
+  qCurrent.textContent = currentIndex + 1;
+  qTotal.textContent = roundQuestions.length;
+  progressFill.style.width = ((currentIndex) / roundQuestions.length * 100) + '%';
+
+  renderJudgeRow();
+  nextBtn.classList.remove('active');
+  nextBtn.textContent = (currentIndex === roundQuestions.length - 1) ? '看結果 →' : '下一題 →';
+}
+
+function renderJudgeRow() {
+  judgeRow.innerHTML = `
+    <button class="judge-btn judge-correct" id="btn-correct">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      答對
+    </button>
+    <button class="judge-btn judge-wrong" id="btn-wrong">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      答錯
+    </button>
+  `;
+  document.getElementById('btn-correct').addEventListener('click', (e) => { e.stopPropagation(); judge(true); });
+  document.getElementById('btn-wrong').addEventListener('click', (e) => { e.stopPropagation(); judge(false); });
+}
+
+function judge(isCorrect) {
+  if (currentAnswered) return;
+  currentAnswered = true;
+  answeredCount++;
+  if (isCorrect) correctCount++;
+
+  const correctBtn = document.getElementById('btn-correct');
+  const wrongBtn = document.getElementById('btn-wrong');
+  if (isCorrect) {
+    correctBtn.classList.add('chosen-correct');
+  } else {
+    wrongBtn.classList.add('chosen-wrong');
+  }
+  correctBtn.disabled = true;
+  wrongBtn.disabled = true;
+
+  updateAccuracy();
+  nextBtn.classList.add('active');
+}
+
+function updateAccuracy() {
+  if (answeredCount === 0) { accuracyVal.textContent = '—'; return; }
+  const pct = Math.round((correctCount / answeredCount) * 100);
+  accuracyVal.textContent = pct + '% (' + correctCount + '/' + answeredCount + ')';
+}
+
+card.addEventListener('click', () => {
+  card.classList.toggle('flipped');
+});
+card.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    card.classList.toggle('flipped');
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  if (!nextBtn.classList.contains('active')) return;
+  if (currentIndex < roundQuestions.length - 1) {
+    currentIndex++;
+    renderCurrentQuestion();
+  } else {
+    showResult();
+  }
+});
+
+function showResult() {
+  document.getElementById('quiz-screen').hidden = true;
+  document.getElementById('result-screen').hidden = false;
+  const pct = answeredCount === 0 ? 0 : Math.round((correctCount / answeredCount) * 100);
+  document.getElementById('result-rate').textContent = pct + '%';
+  document.getElementById('result-detail').textContent = '答對 ' + correctCount + '／共 ' + roundQuestions.length + ' 題';
+}
+
+document.getElementById('retry-same').addEventListener('click', () => {
+  const n = lastRoundCount === 'all' ? QUESTION_BANK.length : Math.min(parseInt(lastRoundCount, 10), QUESTION_BANK.length);
+  roundQuestions = shuffle(QUESTION_BANK).slice(0, n);
+  currentIndex = 0;
+  correctCount = 0;
+  answeredCount = 0;
+  document.getElementById('result-screen').hidden = true;
+  document.getElementById('quiz-screen').hidden = false;
+  renderCurrentQuestion();
+});
+
+document.getElementById('back-to-start').addEventListener('click', () => {
+  document.getElementById('result-screen').hidden = true;
+  document.getElementById('start-screen').hidden = false;
+});
+
+</script>
+
+</body>
+</html>
