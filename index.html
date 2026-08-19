@@ -269,9 +269,9 @@
   .q-body{
     display:flex;
     align-items:center;
-    justify-content:center;
+    justify-content:flex-start     /*center*/;
     flex:1;
-    text-align:center;
+    text-align:left /*center*/;
     padding: 30px 6px 10px;
   }
   .q-text{
@@ -280,9 +280,11 @@
     line-height:1.55;
     font-weight:600;
     white-space: pre-line;
+    text-align: left; /* 新增：確保題目文字本身靠左 */
+    width: 100%;      /* 新增：將容器寬度撐滿 */
   }
   .flip-hint{
-    text-align:center;
+    text-align:left    /*center*/;
     font-family: var(--mono);
     font-size: 10.5px;
     color: var(--muted);
