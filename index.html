@@ -15,7 +15,7 @@
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#141210;
@@ -397,30 +397,70 @@
   .next-btn:focus-visible{ outline: 2px solid var(--brass); outline-offset:2px; }
 
   /* ---------- Result screen ---------- */
-  .result-stamp{
-    text-align:center;
-    padding: 10px 0 6px;
+  .split-area{
+    display:flex;
+    gap: 22px;
   }
-  .result-stamp .big{
+  .left-col{
+    width: 38%;
+    display:flex;
+    flex-direction:column;
+    gap: 12px;
+    justify-content:center;
+  }
+  .right-col{
+    flex:1;
+    border-left: 1px solid var(--line);
+    padding-left: 22px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+  .right-col .big{
     font-family: var(--serif);
     font-size: 54px;
     font-weight:700;
     color: var(--brass);
     line-height:1;
   }
-  .result-stamp .sub{
+  .right-col .sub{
     font-family: var(--mono);
     font-size: 13px;
     color: #c6c8d4;
     margin-top:10px;
   }
-  .result-row{
+  .bottom-strip{
+    margin-top: 26px;
+    padding: 5px 0;
+    border-top: 1px solid var(--line);
+    min-height: 14px;
     display:flex;
-    gap:10px;
-    margin-top:28px;
+    align-items:center;
+    justify-content:flex-start;
+    gap: 8px;
+  }
+  .chat-line{
+    position:relative;
+    top: 20px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .chat-user{
+    font-family: 'Press Start 2P', var(--mono);
+    font-size: 9px;
+    color: var(--brass);
+    white-space:nowrap;
+  }
+  .chat-msg{
+    font-family: 'Press Start 2P', var(--mono);
+    font-size: 9px;
+    color: var(--paper);
+    white-space:nowrap;
   }
   .ghost-btn{
-    flex:1;
     font-family: var(--sans);
     font-weight:600;
     font-size:14px;
@@ -438,6 +478,11 @@
     .panel{ padding: 28px 20px; }
     .q-text{ font-size:19px; }
     .card{ min-height: 380px; }
+    .chat-user, .chat-msg{ font-size: 7.5px; }
+    .split-area{ gap: 14px; }
+    .left-col{ gap: 8px; }
+    .ghost-btn{ font-size:12.5px; padding: 11px 6px; }
+    .judge-btn{ font-size:12.5px; padding: 12px 6px; gap:6px; }
   }
   @media (prefers-reduced-motion: reduce){
     .card, .progress-fill, .next-btn, .judge-btn{ transition:none !important; }
@@ -535,13 +580,18 @@
   <!-- ============ RESULT SCREEN ============ -->
   <section class="panel" id="result-screen" hidden>
     <p class="eyebrow">Round Complete · 本輪結束</p>
-    <div class="result-stamp">
-      <div class="big" id="result-rate">0%</div>
-      <p class="sub" id="result-detail">答對 0／共 0 題</p>
+    <div class="split-area">
+      <div class="left-col">
+        <button class="ghost-btn" id="retry-same">再玩一次</button>
+        <button class="ghost-btn" id="back-to-start">重新選擇題數</button>
+      </div>
+      <div class="right-col">
+        <div class="big" id="result-rate">0%</div>
+        <p class="sub" id="result-detail">答對 0／共 0 題</p>
+      </div>
     </div>
-    <div class="result-row">
-      <button class="ghost-btn" id="retry-same">再玩一次</button>
-      <button class="ghost-btn" id="back-to-start">重新選擇題數</button>
+    <div class="bottom-strip">
+      <span class="chat-line"><span class="chat-user">LNG_Fan20120908</span><span class="chat-msg">: 123123</span></span>
     </div>
   </section>
 
@@ -788,7 +838,7 @@ function renderJudgeRow() {
   judgeRow.innerHTML = `
     <button class="judge-btn judge-correct" id="btn-correct">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      答對
+      Bingo 答對囉
     </button>
     <button class="judge-btn judge-wrong" id="btn-wrong">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
