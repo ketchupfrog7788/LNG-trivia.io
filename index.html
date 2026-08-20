@@ -259,20 +259,13 @@
     border-radius: 3px;
     letter-spacing:0.05em;
   }
-  .qmark{
-    position:absolute; top:12px; right:18px;
-    font-family: var(--serif);
-    font-size: 46px;
-    color: rgba(34,36,47,0.08);
-    font-style:italic;
-  }
   .q-body{
     display:flex;
     align-items:center;
     justify-content:flex-start     /*center*/;
     flex:1;
     text-align:left /*center*/;
-    padding: 30px 6px 10px;
+    padding: 10px 6px 10px;
   }
   .q-text{
     font-family: var(--serif);
@@ -482,7 +475,6 @@
 
   <!-- ============ START SCREEN ============ -->
   <section class="panel" id="start-screen">
-    <p class="eyebrow">Round Setup · 開始一輪</p>
     <h2>今天想挑戰幾題?</h2>
     <p class="desc">系統會從題庫中隨機抽取並打亂順序，翻牌看答案、自行判斷答對或答錯，即時計算正確率。</p>
 
@@ -512,7 +504,6 @@
       <div class="card" id="card" tabindex="0" role="button" aria-label="點擊翻牌查看答案">
         <div class="face face-front">
           <span class="card-index" id="card-index-front">NO. 001</span>
-          <span class="qmark">Q</span>
           <div class="q-body"><p class="q-text" id="q-text"></p></div>
           <p class="flip-hint">點卡片翻面看答案</p>
         </div>
@@ -648,7 +639,9 @@ function setupCountButtons() {
   [...countGrid.querySelectorAll('.count-btn')].forEach(btn => {
     btn.classList.remove('disabled');
     btn.disabled = false;
-    btn.style.background = 'transparent';
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
     const c = btn.dataset.count;
     if (c !== 'all' && parseInt(c, 10) > QUESTION_BANK.length) {
       btn.classList.add('disabled');
@@ -660,7 +653,11 @@ function setupCountButtons() {
 [...countGrid.querySelectorAll('.count-btn')].forEach(btn => {
   btn.addEventListener('click', () => {
     if (btn.disabled) return;
-    countGrid.querySelectorAll('.count-btn').forEach(b => b.style.background = 'transparent');
+    countGrid.querySelectorAll('.count-btn').forEach(b => {
+      b.style.background = '';
+      b.style.borderColor = '';
+      b.style.color = '';
+    });
     btn.style.background = 'rgba(255,184,0,0.16)';
     btn.style.borderColor = 'var(--brass)';
     btn.style.color = 'var(--brass)';
@@ -746,6 +743,20 @@ function normalizeLineBreaks(text) {
   return text.replace(/\\n/g, '\n');
 }
 
+// 量測題目文字實際渲染後佔了幾行，超過 6 行就把字體縮小 2px
+// 每次都先清空自訂字體大小、回到 CSS 預設值再重新量測，
+// 這樣切換題目時才不會延續上一題縮小過的字體。
+function adjustQuestionFontSize() {
+  qText.style.fontSize = '';
+  const style = getComputedStyle(qText);
+  const fontSize = parseFloat(style.fontSize);
+  const lineHeight = parseFloat(style.lineHeight) || fontSize * 1.55;
+  const lines = Math.round(qText.scrollHeight / lineHeight);
+  if (lines > 6) {
+    qText.style.fontSize = (fontSize - 2) + 'px';
+  }
+}
+
 function renderCurrentQuestion() {
   currentAnswered = false;
   card.classList.remove('flipped');
@@ -762,6 +773,7 @@ function renderCurrentQuestion() {
   } else {
     aTimestamp.hidden = true;
   }
+  adjustQuestionFontSize();
 
   qCurrent.textContent = currentIndex + 1;
   qTotal.textContent = roundQuestions.length;
