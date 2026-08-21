@@ -419,7 +419,7 @@
     text-align:center;
   }
   .right-col .big{
-    font-family: var(--serif);
+    font-family: 'Press Start 2P', var(--serif);
     font-size: 54px;
     font-weight:700;
     color: var(--brass);
@@ -450,15 +450,18 @@
   }
   .chat-user{
     font-family: 'Press Start 2P', var(--mono);
-    font-size: 9px;
+    font-size: 14px;
     color: var(--brass);
     white-space:nowrap;
   }
   .chat-msg{
     font-family: 'Press Start 2P', var(--mono);
-    font-size: 9px;
+    font-size: 14px;
     color: var(--paper);
     white-space:nowrap;
+  }
+  #result-screen{
+    zoom: 1.5;
   }
   .ghost-btn{
     font-family: var(--sans);
@@ -478,11 +481,12 @@
     .panel{ padding: 28px 20px; }
     .q-text{ font-size:19px; }
     .card{ min-height: 380px; }
-    .chat-user, .chat-msg{ font-size: 7.5px; }
+    .chat-user, .chat-msg{ font-size: 12px; }
     .split-area{ gap: 14px; }
     .left-col{ gap: 8px; }
     .ghost-btn{ font-size:12.5px; padding: 11px 6px; }
     .judge-btn{ font-size:12.5px; padding: 12px 6px; gap:6px; }
+    #result-screen{ zoom: 1.15; }
   }
   @media (prefers-reduced-motion: reduce){
     .card, .progress-fill, .next-btn, .judge-btn{ transition:none !important; }
@@ -590,8 +594,8 @@
         <p class="sub" id="result-detail">答對 0／共 0 題</p>
       </div>
     </div>
-    <div class="bottom-strip">
-      <span class="chat-line"><span class="chat-user">LNG_Fan20120908</span><span class="chat-msg">: 123123</span></span>
+    <div class="bottom-strip" id="easter-egg-strip" hidden>
+      <span class="chat-line"><span class="chat-user" id="easter-egg-user"></span><span class="chat-msg" id="easter-egg-msg"></span></span>
     </div>
   </section>
 
@@ -609,6 +613,73 @@
    之後要新增/修改題目，直接編輯試算表即可，網頁會自動讀取最新內容。
    ========================================================= */
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYys23lt7g7pEBBGWiobb5z175NUyBAMYc8gfW2dHB3uDYgUoHNFHUzXsPcW8_P3RcujUzd78te0gT/pub?gid=0&single=true&output=csv";
+
+/* =========================================================
+   彩蛋區資料來源：另一份 Google 試算表（發布為 CSV）
+   欄位順序（由左到右）對應答對率區間：
+   第1欄 100~85（含頭含尾）／第2欄 85~60（不含85含60）
+   第3欄 60~35（不含60含35）／第4欄 35~0（不含35含0）
+   ========================================================= */
+const EASTER_EGG_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYys23lt7g7pEBBGWiobb5z175NUyBAMYc8gfW2dHB3uDYgUoHNFHUzXsPcW8_P3RcujUzd78te0gT/pub?gid=1843609931&single=true&output=csv";
+let EASTER_EGG_BUCKETS = [[], [], [], []]; // 索引0=100~85, 1=85~60, 2=60~35, 3=35~0
+
+function csvToEasterEggBuckets(csvText) {
+  const rows = parseCSV(csvText).filter(r => r.some(cell => cell.trim() !== ''));
+  const buckets = [[], [], [], []];
+  for (let i = 1; i < rows.length; i++) { // 第一列是標題，略過
+    const r = rows[i];
+    for (let c = 0; c < 4; c++) {
+      const cell = (r[c] || '').trim();
+      if (cell) buckets[c].push(cell);
+    }
+  }
+  return buckets;
+}
+
+async function loadEasterEggBank() {
+  try {
+    const res = await fetch(EASTER_EGG_CSV_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const csvText = await res.text();
+    EASTER_EGG_BUCKETS = csvToEasterEggBuckets(csvText);
+  } catch (err) {
+    console.error('彩蛋資料載入失敗（不影響主要測驗功能）：', err);
+  }
+}
+
+// 依答對率取得對應的彩蛋 bucket 索引
+function getEasterEggBucketIndex(pct) {
+  if (pct >= 85 && pct <= 100) return 0;
+  if (pct >= 60 && pct < 85) return 1;
+  if (pct >= 35 && pct < 60) return 2;
+  return 3; // 0 <= pct < 35
+}
+
+// 把 "使用者名稱:訊息" 拆成兩段；沒有冒號的就整句當訊息、不顯示使用者名稱
+function parseEasterEggEntry(raw) {
+  const idx = raw.indexOf(':');
+  if (idx === -1) return { user: '', msg: raw };
+  return { user: raw.slice(0, idx).trim(), msg: ': ' + raw.slice(idx + 1).trim() };
+}
+
+// 依答對率隨機挑一句彩蛋，並更新畫面；bucket 是空的就直接隱藏整條
+function showEasterEgg(pct) {
+  const bucketIndex = getEasterEggBucketIndex(pct);
+  const pool = EASTER_EGG_BUCKETS[bucketIndex];
+  const strip = document.getElementById('easter-egg-strip');
+  const userEl = document.getElementById('easter-egg-user');
+  const msgEl = document.getElementById('easter-egg-msg');
+
+  if (!pool || pool.length === 0) {
+    strip.hidden = true;
+    return;
+  }
+  const picked = pool[Math.floor(Math.random() * pool.length)];
+  const { user, msg } = parseEasterEggEntry(picked);
+  userEl.textContent = user;
+  msgEl.textContent = msg;
+  strip.hidden = false;
+}
 
 let QUESTION_BANK = [];
 
@@ -748,6 +819,7 @@ async function loadQuestionBank() {
 
 document.getElementById('retry-btn').addEventListener('click', loadQuestionBank);
 loadQuestionBank();
+loadEasterEggBank();
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -901,6 +973,7 @@ function showResult() {
   const pct = answeredCount === 0 ? 0 : Math.round((correctCount / answeredCount) * 100);
   document.getElementById('result-rate').textContent = pct + '%';
   document.getElementById('result-detail').textContent = '答對 ' + correctCount + '／共 ' + roundQuestions.length + ' 題';
+  showEasterEgg(pct);
 }
 
 document.getElementById('retry-same').addEventListener('click', () => {
