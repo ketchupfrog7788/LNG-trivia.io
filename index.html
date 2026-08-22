@@ -4,13 +4,14 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LNG每日問答</title>
+<title>LNG每日知識問答</title>
+<link rel="icon" href="favicon.jpg">
 <meta name="google-site-verification" content="JmH0Y-f61FClgZvfTSxCHPCJTb6CZZhegYguumqpv6M" />
 <!-- 2. Google 搜尋結果顯示的簡介文字 -->
 <meta name="description" content="LNG每日問答題庫儲存處">
 
 <!-- 3. 社群分享設定（Line、FB、Discord 貼上網址時會出現的預覽卡片） -->
-<meta property="og:title" content="LNG每日問答">
+<meta property="og:title" content="LNG每日知識問答">
 <meta property="og:description" content="LNG每日問答題庫儲存處">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -493,6 +494,40 @@
   }
   [hidden]{ display:none !important; }
 
+  #page-loading-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(255, 248, 232, 0.94);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap: 24px;
+    transition: opacity .4s ease;
+  }
+  #page-loading-overlay.fade-out{
+    opacity: 0;
+    pointer-events:none;
+  }
+  #page-loading-text{
+    font-family: var(--serif);
+    font-size: 34px;
+    font-weight:700;
+    color: var(--ink-text);
+    margin:0;
+  }
+  #page-loading-gif{
+    width: 180px;
+    max-width: 60vw;
+    height: auto;
+    border-radius: 8px;
+  }
+  @media (max-width:480px){
+    #page-loading-text{ font-size: 24px; }
+    #page-loading-gif{ width: 140px; }
+  }
+
   .site-footer{
     width:100%;
     max-width: 560px;
@@ -514,6 +549,11 @@
 </style>
 </head>
 <body>
+
+<div id="page-loading-overlay">
+  <p id="page-loading-text">載入中……</p>
+  <img id="page-loading-gif" src="" alt="載入動畫">
+</div>
 
 <div class="brand">
   <div class="mark">?</div>
@@ -795,12 +835,20 @@ async function loadQuestionBank() {
   poolNote.hidden = true;
   startBtn.hidden = true;
 
+  // 進站遮罩最短顯示 2 秒，避免題庫讀取太快時遮罩一閃就消失
+  const minDelay = new Promise(resolve => setTimeout(resolve, 2000));
+
   try {
-    const res = await fetch(SHEET_CSV_URL, { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const csvText = await res.text();
-    const bank = csvToQuestionBank(csvText);
-    if (bank.length === 0) throw new Error('題庫是空的');
+    const fetchTask = (async () => {
+      const res = await fetch(SHEET_CSV_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const csvText = await res.text();
+      const bank = csvToQuestionBank(csvText);
+      if (bank.length === 0) throw new Error('題庫是空的');
+      return bank;
+    })();
+
+    const [bank] = await Promise.all([fetchTask, minDelay]);
 
     QUESTION_BANK = bank;
     poolSizeEl.textContent = QUESTION_BANK.length;
@@ -811,11 +859,36 @@ async function loadQuestionBank() {
     poolNote.hidden = false;
     startBtn.hidden = false;
   } catch (err) {
+    await minDelay;
     loadingNote.hidden = true;
     errorNote.hidden = false;
     console.error('題庫載入失敗：', err);
   }
+  hidePageLoadingOverlay();
 }
+
+// ============ 進站載入畫面：隨機選一個 GIF，淡出後消失 ============
+// 這兩個 GIF 檔案要跟 index.html 放在同一層資料夾，用檔名直接讀取
+const PAGE_LOADING_GIFS = [
+  "老王.gif",
+  "八毛.gif"
+];
+
+function initPageLoadingOverlay() {
+  const gifEl = document.getElementById('page-loading-gif');
+  const picked = PAGE_LOADING_GIFS[Math.floor(Math.random() * PAGE_LOADING_GIFS.length)];
+  gifEl.src = picked;
+}
+
+function hidePageLoadingOverlay() {
+  const overlay = document.getElementById('page-loading-overlay');
+  overlay.classList.add('fade-out');
+  overlay.addEventListener('transitionend', () => {
+    overlay.hidden = true;
+  }, { once: true });
+}
+
+initPageLoadingOverlay();
 
 document.getElementById('retry-btn').addEventListener('click', loadQuestionBank);
 loadQuestionBank();
