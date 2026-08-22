@@ -808,6 +808,8 @@ function parseEasterEggEntry(raw) {
 }
 
 // 依答對率隨機挑一句彩蛋，並更新畫面；bucket 是空的就直接隱藏整條
+let easterEggTypeTimer = null;
+
 function showEasterEgg(pct) {
   const bucketIndex = getEasterEggBucketIndex(pct);
   const pool = EASTER_EGG_BUCKETS[bucketIndex];
@@ -815,15 +817,32 @@ function showEasterEgg(pct) {
   const userEl = document.getElementById('easter-egg-user');
   const msgEl = document.getElementById('easter-egg-msg');
 
+  // 清掉上一次還在跑的打字動畫，避免重疊
+  if (easterEggTypeTimer) {
+    clearInterval(easterEggTypeTimer);
+    easterEggTypeTimer = null;
+  }
+
   if (!pool || pool.length === 0) {
     strip.hidden = true;
     return;
   }
   const picked = pool[Math.floor(Math.random() * pool.length)];
   const { user, msg } = parseEasterEggEntry(picked);
-  userEl.textContent = user;
-  msgEl.textContent = msg;
+
+  userEl.textContent = user; // 帳號（如果有）直接顯示，不做逐字效果
+  msgEl.textContent = '';
   strip.hidden = false;
+
+  let i = 0;
+  easterEggTypeTimer = setInterval(() => {
+    i++;
+    msgEl.textContent = msg.slice(0, i);
+    if (i >= msg.length) {
+      clearInterval(easterEggTypeTimer);
+      easterEggTypeTimer = null;
+    }
+  }, 60); // 每個字的間隔（毫秒），想更快或更慢可以調整這個數字
 }
 
 let QUESTION_BANK = [];
