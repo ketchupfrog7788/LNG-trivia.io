@@ -910,6 +910,7 @@ let currentIndex = 0;
 let correctCount = 0;
 let answeredCount = 0;
 let currentAnswered = false;
+let currentChoice = null; // null=尚未選擇, true=標記答對, false=標記答錯
 let lastRoundCount = 10;
 
 const poolSizeEl = document.getElementById('pool-size');
@@ -995,7 +996,8 @@ async function loadQuestionBank() {
 // 這兩個 GIF 檔案要跟 index.html 放在同一層資料夾，用檔名直接讀取
 const PAGE_LOADING_GIFS = [
   "老王.gif",
-  "八毛.gif"
+  "八毛.gif",
+  "小六.gif"
 ];
 
 function initPageLoadingOverlay() {
@@ -1078,6 +1080,7 @@ function adjustQuestionFontSize() {
 
 function renderCurrentQuestion() {
   currentAnswered = false;
+  currentChoice = null;
   card.classList.remove('flipped');
   const item = roundQuestions[currentIndex];
   const label = 'NO. ' + String(currentIndex + 1).padStart(3, '0');
@@ -1119,20 +1122,29 @@ function renderJudgeRow() {
 }
 
 function judge(isCorrect) {
-  if (currentAnswered) return;
-  currentAnswered = true;
-  answeredCount++;
+  if (currentChoice === isCorrect) return; // 已經是這個選擇了，不用重複處理
+
+  if (currentChoice === null) {
+    // 這一題第一次作答
+    answeredCount++;
+  } else if (currentChoice === true) {
+    // 從「答對」改選「答錯」，扣掉原本算進去的一次答對
+    correctCount--;
+  }
   if (isCorrect) correctCount++;
+  currentChoice = isCorrect;
+  currentAnswered = true;
 
   const correctBtn = document.getElementById('btn-correct');
   const wrongBtn = document.getElementById('btn-wrong');
+  correctBtn.classList.remove('chosen-correct');
+  wrongBtn.classList.remove('chosen-wrong');
   if (isCorrect) {
     correctBtn.classList.add('chosen-correct');
   } else {
     wrongBtn.classList.add('chosen-wrong');
   }
-  correctBtn.disabled = true;
-  wrongBtn.disabled = true;
+  // 按鈕保持可點擊，讓玩家在按下一題以前都能自由更改選擇
 
   updateAccuracy();
   nextBtn.classList.add('active');
