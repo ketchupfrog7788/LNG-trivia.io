@@ -528,6 +528,100 @@
     #page-loading-gif{ width: 210px; }
   }
 
+  #secret-message-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(40, 38, 34, 0.82);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 40px 20px;
+    overflow-y:auto;
+  }
+  #secret-message-close{
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.28);
+    color: rgba(60,40,10,0.75);
+    font-size: 16px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: background .15s ease;
+  }
+  #secret-message-close:hover{ background: rgba(255,255,255,0.44); }
+  #secret-message-close:focus-visible{ outline: 2px solid var(--brass); outline-offset:2px; }
+  #secret-message-content{
+    position: relative;
+    max-width: 400px;
+    width: 100%;
+    min-height: 60vh;
+    color: var(--ink-text);
+    font-family: var(--sans);
+    background:
+      linear-gradient(180deg, rgba(255,214,140,0.22), rgba(255,184,0,0.10)),
+      rgba(30,26,20,0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,184,0,0.55);
+    border-radius: 10px;
+    box-shadow: 0 0 40px rgba(255,184,0,0.18), inset 0 0 60px rgba(255,184,0,0.08);
+    padding: 44px 30px 36px;
+  }
+  #secret-message-content::before,
+  #secret-message-content::after{
+    content:"";
+    position:absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--brass);
+    opacity:0.8;
+  }
+  #secret-message-content::before{
+    top: -1px; left: -1px;
+    border-right:none; border-bottom:none;
+  }
+  #secret-message-content::after{
+    bottom: -1px; right: -1px;
+    border-left:none; border-top:none;
+  }
+  .secret-greeting{
+    font-size: 17px;
+    margin: 0 0 14px;
+    color: #ffffff;
+  }
+  #secret-message-content p{
+    font-size: 16.5px;
+    line-height:1.9;
+    margin: 0 0 16px;
+    color: #ffffff;
+  }
+  .secret-indent{
+    text-indent: 2em;
+  }
+  .secret-signature{
+    text-align:right;
+    margin-top: 24px;
+    color: #ffffff;
+  }
+
+  @media (max-width:480px){
+    #secret-message-overlay{ padding: 24px 16px; }
+    #secret-message-content{ padding: 36px 20px 26px; min-height:50vh; }
+    #secret-message-close{ width: 28px; height: 28px; font-size: 13px; top: 10px; right: 10px; }
+    .secret-greeting{ font-size: 14px; margin-bottom: 10px; }
+    #secret-message-content p{ font-size: 13.5px; line-height:1.75; margin-bottom: 12px; }
+    .secret-signature{ margin-top: 18px; }
+  }
+
   .site-footer{
     width:100%;
     max-width: 560px;
@@ -553,6 +647,17 @@
 <div id="page-loading-overlay">
   <p id="page-loading-text">載入中……</p>
   <img id="page-loading-gif" src="" alt="載入動畫">
+</div>
+
+<div id="secret-message-overlay" hidden>
+  <div id="secret-message-content">
+    <button id="secret-message-close" aria-label="關閉">✕</button>
+    <p class="secret-greeting">親愛的參與者您好:</p>
+    <p class="secret-indent">恭喜您完成目前所有LNG每日知識問答題庫裡所有題目，很感謝您願意花時間來遊玩這個網站，也很感謝您參與每天在thread上發布的LNG問答，不管您是留言、按讚或者瀏覽都帶給我動力，讓這個活動繼續下去。</p>
+    <p>一開始我想說做個30題就差不多結束，完全沒想過可以持續發文到這麼多天。而且連玉子燒(藥頭)、六嘆、小葵他們都看到我的帳號了，鳥屎甚至還有來留言!!這些事都讓我超級開心的!</p>
+    <p>看到這則訊息的人，請直接私訊我的帳號告訴我你成功完成所有題目吧(●'◡'●)</p>
+    <p class="secret-signature">ketchupfrog 敬上</p>
+  </div>
 </div>
 
 <div class="brand">
@@ -1036,8 +1141,18 @@ nextBtn.addEventListener('click', () => {
     currentIndex++;
     renderCurrentQuestion();
   } else {
-    showResult();
+    document.getElementById('quiz-screen').hidden = true;
+    if (lastRoundCount === 'all') {
+      document.getElementById('secret-message-overlay').hidden = false;
+    } else {
+      showResult();
+    }
   }
+});
+
+document.getElementById('secret-message-close').addEventListener('click', () => {
+  document.getElementById('secret-message-overlay').hidden = true;
+  showResult();
 });
 
 function showResult() {
