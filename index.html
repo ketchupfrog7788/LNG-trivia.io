@@ -76,6 +76,37 @@
     max-width: 560px;
   }
 
+  /* ---------- Folder tabs ---------- */
+  .tab-bar{
+    display:flex;
+    gap: 6px;
+    padding-left: 14px;
+  }
+  .tab-btn{
+    clip-path: polygon(14% 0%, 86% 0%, 100% 100%, 0% 100%);
+    border: none;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 13px 30px 16px;
+    background: rgba(255,244,220,0.08);
+    color: var(--muted);
+    position: relative;
+    top: 3px;
+    transition: background .15s ease, color .15s ease, top .15s ease;
+  }
+  .tab-btn:hover:not(.active){
+    background: rgba(255,244,220,0.16);
+    color: var(--paper);
+  }
+  .tab-btn.active{
+    background: var(--ink-2);
+    color: var(--brass);
+    top: 0;
+  }
+  .tab-btn:focus-visible{ outline: 2px solid var(--brass); outline-offset:2px; }
+
   /* ---------- Start screen ---------- */
   .panel{
     background: var(--ink-2);
@@ -111,6 +142,76 @@
     line-height:1.7;
     margin: 0 0 26px;
   }
+  .credit-table-wrap{
+    margin: 22px 0 0;
+    overflow-x:auto;
+  }
+  .credit-table{
+    width:100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .credit-table td{
+    border: 1px solid var(--line);
+    padding: 14px 10px;
+    vertical-align: middle;
+  }
+  .credit-avatar-cell{
+    width: 84px;
+    text-align:center;
+  }
+  .credit-info-cell{
+    width: 33%;
+    text-align:center;
+  }
+  .avatar-placeholder{
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto;
+    background: rgba(255,244,220,0.06);
+    border: 1px dashed rgba(255,244,220,0.28);
+  }
+  .avatar-img{
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto;
+    display:block;
+    object-fit: cover;
+    border: 1px solid var(--line);
+  }
+  .credit-names{
+    font-family: var(--sans);
+    font-weight:600;
+    font-size: 14px;
+    color: var(--paper);
+    margin: 0 0 8px;
+  }
+  .credit-links{
+    display:flex;
+    flex-direction:column;
+    gap: 5px;
+    margin:0;
+  }
+  .credit-links a{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--wrong);
+    text-decoration:none;
+    word-break: break-all;
+    border-bottom: 1px solid transparent;
+  }
+  .credit-links a:hover{ border-bottom-color: var(--wrong); }
+  @media (max-width:480px){
+    .avatar-placeholder{ width: 44px; height:44px; }
+    .avatar-img{ width: 44px; height:44px; }
+    .credit-avatar-cell{ width: 60px; padding: 10px 4px; }
+    .credit-info-cell{ padding: 10px 6px; }
+    .credit-names{ font-size: 12.5px; }
+    .credit-links a{ font-size: 10px; }
+  }
+
   .count-grid{
     display:grid;
     grid-template-columns: repeat(3,1fr);
@@ -667,6 +768,13 @@
 
 <div class="stage">
 
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-btn-quiz" data-tab="quiz">問答區</button>
+    <button class="tab-btn" id="tab-btn-highlights" data-tab="highlights">精華區</button>
+  </div>
+
+  <div id="tab-content-quiz">
+
   <!-- ============ START SCREEN ============ -->
   <section class="panel" id="start-screen">
     <h2>今天想挑戰幾題?</h2>
@@ -744,6 +852,17 @@
     </div>
   </section>
 
+  </div>
+
+  <!-- ============ HIGHLIGHTS TAB（精華區，動態讀取試算表）============ -->
+  <div id="tab-content-highlights" class="panel" hidden>
+    <p class="eyebrow">Highlights · 精華區</p>
+    <h2>感謝這些藥頭們:</h2>
+    <div id="highlights-table-container">
+      <p class="desc">精華名單載入中……</p>
+    </div>
+  </div>
+
 </div>
 
 <footer class="site-footer">
@@ -789,6 +908,88 @@ async function loadEasterEggBank() {
     EASTER_EGG_BUCKETS = csvToEasterEggBuckets(csvText);
   } catch (err) {
     console.error('彩蛋資料載入失敗（不影響主要測驗功能）：', err);
+  }
+}
+
+/* =========================================================
+   精華區資料來源：Google 試算表（發布為 CSV）
+   沒有標題列，每 2 列為一組：
+   第1列：頭像1網址, 名字1, 頭像2網址, 名字2
+   第2列：(空), 連結1, (空), 連結2
+   ========================================================= */
+const HIGHLIGHTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYys23lt7g7pEBBGWiobb5z175NUyBAMYc8gfW2dHB3uDYgUoHNFHUzXsPcW8_P3RcujUzd78te0gT/pub?gid=775364591&single=true&output=csv";
+
+function csvToHighlights(csvText) {
+  const rows = parseCSV(csvText).filter(r => r.some(cell => cell.trim() !== ''));
+  const entries = [];
+  for (let i = 0; i < rows.length; i += 2) {
+    const nameRow = rows[i];
+    const linkRow = rows[i + 1];
+    if (!nameRow || !linkRow) continue;
+    if ((nameRow[1] || '').trim()) {
+      entries.push({
+        avatar: (nameRow[0] || '').trim(),
+        name: (nameRow[1] || '').trim(),
+        link: (linkRow[1] || '').trim()
+      });
+    }
+    if ((nameRow[3] || '').trim()) {
+      entries.push({
+        avatar: (nameRow[2] || '').trim(),
+        name: (nameRow[3] || '').trim(),
+        link: (linkRow[3] || '').trim()
+      });
+    }
+  }
+  return entries;
+}
+
+function renderHighlights(entries) {
+  const container = document.getElementById('highlights-table-container');
+  if (!entries || entries.length === 0) {
+    container.innerHTML = '<p class="desc">精華名單載入失敗，請稍後再試。</p>';
+    return;
+  }
+  let html = '<div class="credit-table-wrap"><table class="credit-table">';
+  for (let i = 0; i < entries.length; i += 2) {
+    html += '<tr>';
+    html += highlightCellsHTML(entries[i]);
+    if (entries[i + 1]) {
+      html += highlightCellsHTML(entries[i + 1]);
+    } else {
+      html += '<td class="credit-avatar-cell"></td><td class="credit-info-cell"></td>';
+    }
+    html += '</tr>';
+  }
+  html += '</table></div>';
+  container.innerHTML = html;
+}
+
+function highlightCellsHTML(entry) {
+  const avatarHTML = entry.avatar
+    ? `<img class="avatar-img" src="${entry.avatar}" alt="${entry.name}" loading="lazy">`
+    : `<div class="avatar-placeholder"></div>`;
+  const linkHTML = entry.link
+    ? `<a href="${entry.link}" target="_blank" rel="noopener noreferrer">${entry.link}</a>`
+    : '';
+  return `
+    <td class="credit-avatar-cell">${avatarHTML}</td>
+    <td class="credit-info-cell">
+      <p class="credit-names">${entry.name}</p>
+      <p class="credit-links">${linkHTML}</p>
+    </td>`;
+}
+
+async function loadHighlights() {
+  try {
+    const res = await fetch(HIGHLIGHTS_CSV_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const csvText = await res.text();
+    const entries = csvToHighlights(csvText);
+    renderHighlights(entries);
+  } catch (err) {
+    console.error('精華名單載入失敗：', err);
+    renderHighlights([]);
   }
 }
 
@@ -1019,6 +1220,23 @@ initPageLoadingOverlay();
 document.getElementById('retry-btn').addEventListener('click', loadQuestionBank);
 loadQuestionBank();
 loadEasterEggBank();
+loadHighlights();
+
+// ============ 分頁切換：問答區 / 精華區 ============
+const tabButtons = document.querySelectorAll('.tab-btn');
+const tabContents = {
+  quiz: document.getElementById('tab-content-quiz'),
+  highlights: document.getElementById('tab-content-highlights')
+};
+tabButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.tab;
+    tabButtons.forEach(b => b.classList.toggle('active', b === btn));
+    Object.keys(tabContents).forEach(key => {
+      tabContents[key].hidden = (key !== target);
+    });
+  });
+});
 
 function shuffle(arr) {
   const a = arr.slice();
