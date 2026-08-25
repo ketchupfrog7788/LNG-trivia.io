@@ -203,6 +203,46 @@
     border-bottom: 1px solid transparent;
   }
   .credit-links a:hover{ border-bottom-color: var(--wrong); }
+
+  /* ---------- LNG tab: 社群圖示 ---------- */
+  .lng-table{
+    width:100%;
+    border-collapse: collapse;
+  }
+  .lng-table td{
+    border: 1px solid var(--line);
+    padding: 14px 12px;
+    vertical-align: middle;
+  }
+  .lng-avatar-cell{
+    width: 84px;
+    text-align:center;
+  }
+  .lng-icons-cell{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 10px;
+  }
+  .lng-icon-link{
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .lng-icon-link:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+  }
+  .lng-icon-link svg{ width: 20px; height: 20px; }
+  @media (max-width:480px){
+    .lng-avatar-cell{ width: 60px; padding: 10px 6px; }
+    .lng-icon-link{ width: 32px; height:32px; }
+    .lng-icon-link svg{ width: 16px; height:16px; }
+  }
   @media (max-width:480px){
     .avatar-placeholder{ width: 44px; height:44px; }
     .avatar-img{ width: 44px; height:44px; }
@@ -771,6 +811,7 @@
   <div class="tab-bar">
     <button class="tab-btn active" id="tab-btn-quiz" data-tab="quiz">問答區</button>
     <button class="tab-btn" id="tab-btn-highlights" data-tab="highlights">精華區</button>
+    <button class="tab-btn" id="tab-btn-lng" data-tab="lng">LNG</button>
   </div>
 
   <div id="tab-content-quiz">
@@ -857,9 +898,18 @@
   <!-- ============ HIGHLIGHTS TAB（精華區，動態讀取試算表）============ -->
   <div id="tab-content-highlights" class="panel" hidden>
     <p class="eyebrow">Highlights · 精華區</p>
-    <h2>感謝這些藥頭們:</h2>
+    <h2>藥頭們:</h2>
     <div id="highlights-table-container">
       <p class="desc">精華名單載入中……</p>
+    </div>
+  </div>
+
+  <!-- ============ LNG TAB（社群連結，動態讀取試算表）============ -->
+  <div id="tab-content-lng" class="panel" hidden>
+    <p class="eyebrow">LNG</p>
+    <h2>社群連結</h2>
+    <div id="lng-table-container">
+      <p class="desc">載入中……</p>
     </div>
   </div>
 
@@ -990,6 +1040,101 @@ async function loadHighlights() {
   } catch (err) {
     console.error('精華名單載入失敗：', err);
     renderHighlights([]);
+  }
+}
+
+/* =========================================================
+   LNG 分頁：社群連結圖示
+   資料來源：Google 試算表（發布為 CSV），沒有標題列，每 2 列一組：
+   第1列：頭像網址, 顯示文字1, 顯示文字2, ...（欄位數不固定）
+   第2列：(空), 連結1, 連結2, ...
+   平台圖示由「網址本身」自動判斷，不需要額外的類型欄位。
+   ========================================================= */
+const LNG_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYys23lt7g7pEBBGWiobb5z175NUyBAMYc8gfW2dHB3uDYgUoHNFHUzXsPcW8_P3RcujUzd78te0gT/pub?gid=1852999398&single=true&output=csv";
+
+// 每種平台的圖示（自繪簡化 SVG）與代表色
+const LNG_ICON_DEFS = {
+  youtube: { color: '#FF0000', svg: '<svg viewBox="0 0 24 24" fill="white"><path d="M23 12s0-3.6-.46-5.3a3 3 0 0 0-2.1-2.1C18.7 4 12 4 12 4s-6.7 0-8.44.6a3 3 0 0 0-2.1 2.1C1 8.4 1 12 1 12s0 3.6.46 5.3a3 3 0 0 0 2.1 2.1C5.3 20 12 20 12 20s6.7 0 8.44-.6a3 3 0 0 0 2.1-2.1C23 15.6 23 12 23 12zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg>' },
+  twitch: { color: '#9146FF', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6"><path d="M5 3h15v11l-4 4h-4l-3 3H8v-3H4V7l1-4z"/><line x1="12" y1="7.5" x2="12" y2="12"/><line x1="16" y1="7.5" x2="16" y2="12"/></svg>' },
+  instagram: { color: '#C13584', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.2" cy="6.8" r="1"/></svg>' },
+  x: { color: '#000000', svg: '<svg viewBox="0 0 24 24" fill="white"><path d="M18.9 3H22l-7.6 8.7L23 21h-6.9l-5.4-6.5L4.5 21H1.3l8.2-9.3L1 3h7l4.9 6 6-6zm-1.2 16h1.9L7.4 4.9H5.4L17.7 19z"/></svg>' },
+  facebook: { color: '#1877F2', svg: '<svg viewBox="0 0 24 24" fill="white"><path d="M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v6h3v-6h2.6l.4-3H14V9.3c0-.2 0-.3.3-.3z"/></svg>' },
+  threads: { color: '#000000', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M12 3c-4.5 0-7 3-7 7v4c0 4 2.5 7 7 7s6.6-2.5 6.9-5.6c.3-3-1-4.9-4-5.4-2.4-.4-3.9.3-3.9 1.8 0 1.1 1 1.6 2.2 1.6"/></svg>' },
+  plurk: { color: '#FF6600', svg: '<svg viewBox="0 0 24 24" fill="white"><ellipse cx="12" cy="11" rx="9" ry="7"/></svg>' },
+  link: { color: '#7a7261', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M9 15l6-6M10 6l1-1a3.5 3.5 0 015 5l-1 1M14 18l-1 1a3.5 3.5 0 01-5-5l1-1"/></svg>' }
+};
+
+// 依網址判斷平台類型，未知平台就用通用連結圖示（不會被漏掉）
+function inferLngLinkType(url) {
+  if (/youtube\.com|youtu\.be/i.test(url)) return 'youtube';
+  if (/twitch\.tv/i.test(url)) return 'twitch';
+  if (/instagram\.com/i.test(url)) return 'instagram';
+  if (/facebook\.com/i.test(url)) return 'facebook';
+  if (/threads\.(com|net)/i.test(url)) return 'threads';
+  if (/plurk\.com/i.test(url)) return 'plurk';
+  if (/x\.com|twitter\.com/i.test(url)) return 'x';
+  return 'link';
+}
+
+function csvToLngEntries(csvText) {
+  const rows = parseCSV(csvText).filter(r => r.some(cell => cell.trim() !== ''));
+  const entries = [];
+  for (let i = 0; i < rows.length; i += 2) {
+    const nameRow = rows[i];
+    const linkRow = rows[i + 1];
+    if (!nameRow || !linkRow) continue;
+    const avatar = (nameRow[0] || '').trim();
+    const maxCols = Math.max(nameRow.length, linkRow.length);
+    const links = [];
+    for (let c = 1; c < maxCols; c++) {
+      const tooltip = (nameRow[c] || '').trim();
+      const url = (linkRow[c] || '').trim();
+      if (!url) continue;
+      links.push({ url, tooltip: tooltip || url, type: inferLngLinkType(url) });
+    }
+    if (links.length > 0) {
+      entries.push({ avatar, links });
+    }
+  }
+  return entries;
+}
+
+function lngIconLinkHTML(type, url, tooltip) {
+  const def = LNG_ICON_DEFS[type] || LNG_ICON_DEFS.link;
+  return `<a class="lng-icon-link" style="background:${def.color}" href="${url}" target="_blank" rel="noopener noreferrer" title="${tooltip || ''}">${def.svg}</a>`;
+}
+
+function renderLngTable(entries) {
+  const container = document.getElementById('lng-table-container');
+  if (!entries || entries.length === 0) {
+    container.innerHTML = '<p class="desc">名單載入失敗，請稍後再試。</p>';
+    return;
+  }
+  let html = '<table class="lng-table">';
+  entries.forEach(entry => {
+    const iconsHTML = entry.links.map(l => lngIconLinkHTML(l.type, l.url, l.tooltip)).join('');
+    const avatarHTML = entry.avatar
+      ? `<img class="avatar-img" src="${entry.avatar}" alt="" loading="lazy">`
+      : `<div class="avatar-placeholder"></div>`;
+    html += `<tr>
+      <td class="lng-avatar-cell">${avatarHTML}</td>
+      <td class="lng-icons-cell">${iconsHTML}</td>
+    </tr>`;
+  });
+  html += '</table>';
+  container.innerHTML = html;
+}
+
+async function loadLng() {
+  try {
+    const res = await fetch(LNG_CSV_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const csvText = await res.text();
+    const entries = csvToLngEntries(csvText);
+    renderLngTable(entries);
+  } catch (err) {
+    console.error('LNG 名單載入失敗：', err);
+    renderLngTable([]);
   }
 }
 
@@ -1221,12 +1366,14 @@ document.getElementById('retry-btn').addEventListener('click', loadQuestionBank)
 loadQuestionBank();
 loadEasterEggBank();
 loadHighlights();
+loadLng();
 
-// ============ 分頁切換：問答區 / 精華區 ============
+// ============ 分頁切換：問答區 / 精華區 / LNG ============
 const tabButtons = document.querySelectorAll('.tab-btn');
 const tabContents = {
   quiz: document.getElementById('tab-content-quiz'),
-  highlights: document.getElementById('tab-content-highlights')
+  highlights: document.getElementById('tab-content-highlights'),
+  lng: document.getElementById('tab-content-lng')
 };
 tabButtons.forEach(btn => {
   btn.addEventListener('click', () => {
