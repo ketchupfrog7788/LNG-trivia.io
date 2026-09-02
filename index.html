@@ -781,6 +781,277 @@
   @media (max-width:480px){
     .site-footer{ padding: 22px 4px 0; }
   }
+  /* ============ 挑戰區小遊戲樣式（全部限定在 #tab-content-challenge 範圍內，避免跟其他分頁的樣式衝突）============ */
+  #tab-content-challenge{
+    --cg-bg: #04120a;
+    --cg-panel: #081a10;
+    --cg-frame: #123018;
+    --cg-green: #39ff6a;
+    --cg-green-dim: #1f7a3d;
+    --cg-green-glow: rgba(57,255,106,0.35);
+    --cg-amber: #ffb000;
+    --cg-red: #ff4444;
+    --cg-purple: #b57bff;
+    --cg-yellow: #ffe066;
+    --cg-cell-empty: #0d2414;
+    --cg-text-dim: #6fa787;
+    --cg-pixel: 'DotGothic16', monospace;
+    --cg-mono: 'IBM Plex Mono', monospace;
+    --cg-sans: 'Noto Sans TC', sans-serif;
+
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(57,255,106,0.06), transparent 60%),
+      var(--cg-bg);
+    color: var(--cg-green);
+    font-family: var(--cg-sans);
+    padding: 24px 16px;
+    border-radius: 8px;
+  }
+  #tab-content-challenge *{ box-sizing:border-box; }
+
+  #tab-content-challenge .game{ width:100%; max-width: 640px; position:relative; margin:0 auto; }
+
+  #tab-content-challenge .game-title{
+    font-family: var(--cg-pixel);
+    font-size: 20px;
+    letter-spacing: 0.08em;
+    color: var(--cg-green);
+    text-shadow: 0 0 8px var(--cg-green-glow);
+    margin: 0 0 14px;
+    text-align:center;
+  }
+
+  #tab-content-challenge .console{
+    position:relative;
+    background: var(--cg-panel);
+    border: 2px solid var(--cg-frame);
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px rgba(57,255,106,0.08), 0 20px 50px -20px rgba(0,0,0,0.8);
+    overflow:hidden;
+  }
+
+  /* ---------- Chat / terminal log ---------- */
+  #tab-content-challenge .log-wrap{
+    position:relative;
+    height: 260px;
+    overflow-y:auto;
+    padding: 16px 18px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(57,255,106,0.025) 0px,
+      rgba(57,255,106,0.025) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    border-bottom: 1px solid var(--cg-frame);
+  }
+  #tab-content-challenge .log-line{
+    font-family: var(--cg-mono);
+    font-size: 13.5px;
+    line-height: 1.8;
+    margin: 0 0 4px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  #tab-content-challenge .spk-系統{ color: var(--cg-amber); font-weight:600; }
+  #tab-content-challenge .spk-ketchupfrog{ color: var(--cg-green); font-weight:600; }
+  #tab-content-challenge .spk-error{ color: var(--cg-red); font-weight:600; }
+  #tab-content-challenge .tok-enemy{ color: var(--cg-purple); }
+  #tab-content-challenge .tok-ally{ color: var(--cg-yellow); }
+  #tab-content-challenge .tok-cause{ color: var(--cg-red); }
+  #tab-content-challenge .cursor{
+    display:inline-block;
+    width: 8px; height: 14px;
+    background: var(--cg-green);
+    margin-left: 2px;
+    animation: cg-blink 1s steps(1) infinite;
+    vertical-align: -2px;
+  }
+  @keyframes cg-blink{ 50%{ opacity:0; } }
+
+  /* ---------- Center overlay banner ---------- */
+  #tab-content-challenge .center-banner{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+    z-index: 20;
+  }
+  #tab-content-challenge .center-banner span{
+    font-family: var(--cg-pixel);
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    padding: 14px 24px;
+    border-radius: 4px;
+    text-align:center;
+    animation: cg-bannerFlash 0.5s steps(1) infinite;
+  }
+  #tab-content-challenge .center-banner.danger span{
+    color: var(--cg-red);
+    background: rgba(255,68,68,0.16);
+    border: 1px solid rgba(255,68,68,0.5);
+  }
+  #tab-content-challenge .center-banner.success span{
+    color: var(--cg-green);
+    background: rgba(57,255,106,0.14);
+    border: 1px solid rgba(57,255,106,0.5);
+  }
+  #tab-content-challenge .center-banner.info span{
+    color: #7ec8ff;
+    background: rgba(126,200,255,0.14);
+    border: 1px solid rgba(126,200,255,0.5);
+  }
+  @keyframes cg-bannerFlash{ 50%{ opacity:0.35; } }
+
+  /* ---------- Battery bar ---------- */
+  #tab-content-challenge .battery-row{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--cg-frame);
+  }
+  #tab-content-challenge .battery-label{
+    font-family: var(--cg-pixel);
+    font-size: 13px;
+    color: var(--cg-text-dim);
+    white-space:nowrap;
+  }
+  #tab-content-challenge .battery{
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap: 3px;
+    padding: 5px 6px;
+    border: 2px solid var(--cg-green-dim);
+    border-radius: 4px;
+    position:relative;
+  }
+  #tab-content-challenge .battery::after{
+    content:"";
+    position:absolute;
+    right: -8px; top: 50%;
+    transform: translateY(-50%);
+    width: 5px; height: 14px;
+    background: var(--cg-green-dim);
+    border-radius: 0 2px 2px 0;
+  }
+  #tab-content-challenge .cell{
+    flex:1; height: 18px;
+    border-radius: 1px;
+    background: var(--cg-cell-empty);
+    transition: background .25s ease, box-shadow .25s ease;
+  }
+  #tab-content-challenge .cell.on{ background: var(--cg-green); box-shadow: 0 0 8px var(--cg-green-glow); }
+  #tab-content-challenge .cell.pulse{ animation: cg-cellPulse .5s ease; }
+  @keyframes cg-cellPulse{
+    0%{ transform: scaleY(0.4); }
+    60%{ transform: scaleY(1.15); }
+    100%{ transform: scaleY(1); }
+  }
+  #tab-content-challenge .battery-count{
+    font-family: var(--cg-mono); font-size: 13px;
+    color: var(--cg-text-dim); white-space:nowrap;
+  }
+
+  /* ---------- Question + options ---------- */
+  #tab-content-challenge .qa-area{
+    padding: 20px 18px 22px;
+    display:flex;
+    gap: 18px;
+  }
+  #tab-content-challenge .qa-question{
+    flex: 1.1;
+    font-family: var(--cg-sans);
+    font-size: 15px;
+    line-height:1.7;
+    color: #d8ffe6;
+  }
+  #tab-content-challenge .qa-question .qnum{
+    display:block;
+    font-family: var(--cg-mono);
+    font-size: 11px;
+    color: var(--cg-text-dim);
+    letter-spacing:0.08em;
+    margin-bottom: 8px;
+  }
+  #tab-content-challenge .qa-question .qnum.special{ color: var(--cg-purple); }
+  #tab-content-challenge .qa-options{
+    flex: 1;
+    display:flex;
+    flex-direction:column;
+    gap: 8px;
+  }
+  #tab-content-challenge .opt-btn{
+    font-family: var(--cg-sans);
+    font-size: 13.5px;
+    text-align:left;
+    color: var(--cg-green);
+    background: transparent;
+    border: 1px solid var(--cg-green-dim);
+    border-radius: 3px;
+    padding: 10px 12px;
+    cursor:pointer;
+    transition: background .12s ease, color .12s ease;
+  }
+  #tab-content-challenge .opt-btn .opt-tag{ font-family: var(--cg-mono); color: var(--cg-green-dim); margin-right: 6px; }
+  #tab-content-challenge .opt-btn:hover:not(:disabled){ background: rgba(57,255,106,0.12); }
+  #tab-content-challenge .opt-btn:disabled{ cursor:default; }
+  #tab-content-challenge .opt-btn.correct{ background: var(--cg-green); color: var(--cg-bg); border-color: var(--cg-green); }
+  #tab-content-challenge .opt-btn.correct .opt-tag{ color: var(--cg-bg); opacity:0.6; }
+  #tab-content-challenge .opt-btn.wrong{ background: rgba(255,68,68,0.16); border-color: var(--cg-red); color: var(--cg-red); }
+  #tab-content-challenge .opt-btn.wrong .opt-tag{ color: var(--cg-red); }
+  #tab-content-challenge .opt-btn.scrambled{ color: var(--cg-purple); border-color: var(--cg-purple); }
+
+  @media (max-width:520px){ #tab-content-challenge .qa-area{ flex-direction:column; } }
+
+  /* ---------- Start / end screens ---------- */
+  #tab-content-challenge .screen{ padding: 40px 24px; text-align:center; }
+  #tab-content-challenge .screen p{
+    font-family: var(--cg-sans); font-size: 14px; line-height:1.8;
+    color: var(--cg-text-dim); margin: 0 0 24px;
+  }
+  #tab-content-challenge .screen .big-msg{
+    font-family: var(--cg-pixel); font-size: 24px;
+    margin: 0 0 12px; text-shadow: 0 0 10px var(--cg-green-glow);
+  }
+  #tab-content-challenge .screen.lose .big-msg{ color: var(--cg-red); text-shadow: 0 0 10px rgba(255,68,68,0.4); }
+  #tab-content-challenge .start-btn{
+    font-family: var(--cg-pixel); font-size: 15px; letter-spacing: 0.06em;
+    color: var(--cg-bg); background: var(--cg-green);
+    border: none; border-radius: 4px;
+    padding: 12px 30px; cursor:pointer;
+    box-shadow: 0 0 16px var(--cg-green-glow);
+  }
+  #tab-content-challenge .start-btn:hover{ filter: brightness(1.1); }
+
+  #tab-content-challenge .skip-btn{
+    position:absolute;
+    right: -8px;
+    top: 262px;
+    transform: translateY(-50%);
+    font-family: var(--cg-mono);
+    font-size: 12px;
+    color: var(--cg-text-dim);
+    background: var(--cg-bg);
+    border: 1px solid var(--cg-green-dim);
+    border-radius: 3px;
+    padding: 6px 12px;
+    cursor:pointer;
+    transition: color .12s ease, border-color .12s ease;
+  }
+  #tab-content-challenge .skip-btn:hover{
+    color: var(--cg-green);
+    border-color: var(--cg-green);
+  }
+
+  #tab-content-challenge [hidden]{ display:none !important; }
+
 </style>
 </head>
 <body>
@@ -812,6 +1083,7 @@
     <button class="tab-btn active" id="tab-btn-quiz" data-tab="quiz">問答區</button>
     <button class="tab-btn" id="tab-btn-highlights" data-tab="highlights">精華區</button>
     <button class="tab-btn" id="tab-btn-lng" data-tab="lng">LNG</button>
+    <button class="tab-btn" id="tab-btn-challenge" data-tab="challenge">挑戰區</button>
   </div>
 
   <div id="tab-content-quiz">
@@ -911,6 +1183,58 @@
     <div id="lng-table-container">
       <p class="desc">載入中……</p>
     </div>
+  </div>
+
+  <!-- ============ CHALLENGE TAB（挑戰區小遊戲）============ -->
+  <div id="tab-content-challenge" hidden>
+<div class="game">
+
+  <audio id="cg-bgm" src="Fight_BGM.mp3" preload="none" loop></audio>
+
+  <div class="console">
+
+    <!-- ============ START SCREEN ============ -->
+    <div class="screen" id="cg-start-screen">
+      <p class="game-title">記憶奪回 重返現實</p>
+      <p class="big-msg" style="color:var(--cg-green)">連線待命中</p>
+      <button class="start-btn" id="cg-start-btn">▶ 開始連線</button>
+    </div>
+
+    <!-- ============ GAME SCREEN ============ -->
+    <div id="cg-game-screen" hidden>
+      <div class="log-wrap" id="cg-log-wrap"></div>
+
+      <div class="battery-row" id="cg-battery-row" hidden>
+        <span class="battery-label">PWR</span>
+        <div class="battery" id="cg-battery"></div>
+        <span class="battery-count" id="cg-battery-count">5/10</span>
+      </div>
+
+      <div class="qa-area" id="cg-qa-area" hidden>
+        <div class="qa-question">
+          <span class="qnum" id="cg-q-num">第 1 / 10 題</span>
+          <span id="cg-q-text"></span>
+        </div>
+        <div class="qa-options" id="cg-qa-options"></div>
+      </div>
+    </div>
+
+    <!-- ============ WIN SCREEN ============ -->
+    <div class="screen" id="cg-win-screen" hidden>
+      <p class="big-msg">記憶全數找回，成功回到現實世界</p>
+      <button class="start-btn" id="cg-restart-btn-win">▶ 重新連線</button>
+    </div>
+
+    <!-- ============ LOSE SCREEN ============ -->
+    <div class="screen lose" id="cg-lose-screen" hidden>
+      <p class="big-msg">意識消失，無法回到現實世界</p>
+      <button class="start-btn" id="cg-restart-btn-lose">▶ 重新連線</button>
+    </div>
+
+  </div>
+
+  <button class="skip-btn" id="cg-skip-btn" hidden>跳過劇情 ▶▶</button>
+</div>
   </div>
 
 </div>
@@ -1373,7 +1697,8 @@ const tabButtons = document.querySelectorAll('.tab-btn');
 const tabContents = {
   quiz: document.getElementById('tab-content-quiz'),
   highlights: document.getElementById('tab-content-highlights'),
-  lng: document.getElementById('tab-content-lng')
+  lng: document.getElementById('tab-content-lng'),
+  challenge: document.getElementById('tab-content-challenge')
 };
 tabButtons.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1578,5 +1903,480 @@ document.getElementById('back-to-start').addEventListener('click', () => {
 
 </script>
 
+
+<script>
+/* ============ 挑戰區小遊戲程式碼（包在 IIFE 裡，避免變數/函式名稱跟主程式衝突）============ */
+(function(){
+
+/* =========================================================
+   真實資料（來自 LNG_知識問答.xlsx 第八分頁）
+   ========================================================= */
+const ALLY_DATA = [
+  {name:"玉子燒", attr:"物"}, {name:"懶熊", attr:"人"}, {name:"火柴人", attr:"人"},
+  {name:"豬魔長老", attr:"人"}, {name:"蘋果", attr:"物"}, {name:"吉娃娃", attr:"人"},
+  {name:"發光眼鏡", attr:"物"}, {name:"貓鼠", attr:"人"}, {name:"米瓜", attr:"物"},
+  {name:"九貓狐", attr:"人"}, {name:"貓咪大軍", attr:"人"}, {name:"大鳥", attr:"人"},
+  {name:"不動老王", attr:"人"}, {name:"純香草餅乾", attr:"人"}, {name:"大尺度寫真", attr:"物"}
+];
+
+const ENEMY_DATA = [
+  {name:"惡房東", cause:"生存空間被剝奪"},
+  {name:"過期的護照", cause:"生命自由受到阻礙"},
+  {name:"大耳朵鄰居", cause:"焦慮提升"},
+  {name:"詐騙信件", cause:"記憶遭到奪取"},
+  {name:"客服", cause:"財產受到持續的損失"},
+  {name:"一波拉病毒", cause:"健康遭到爆擊"},
+  {name:"睡意", cause:"造成低溫凍傷"},
+  {name:"醜男", cause:"被撕咬受傷"},
+  {name:"毒床墊", cause:"持續中毒"},
+  {name:"破音", cause:"尷尬上升"}
+];
+
+const QUESTION_DATA = [
+  {q:"請問小六為什麼會被稱為機械地精?", options:["他電子音","他像是機器人般工作","他過於禮貌"], correct:0},
+  {q:"請問Leggy和老王搭計程車經過哪個建築物，但因為兩個人都怕認錯，所以都不敢講名字?", options:["市政府","行政院","總統府"], correct:2},
+  {q:"老王有一次幫一個沒帶傘的女生撐傘，請問那個女生後來給了老王什麼東西?", options:["牛奶糖","棒棒糖","口香糖"], correct:2},
+  {q:"請問Mona姐出現在Twitch聊天室上的名字是什麼?", options:["Volary","Mona","Rachel"], correct:0},
+  {q:"請問一般市售鍋貼一個大約多少熱量?", options:["120","60","30"], correct:1},
+  {q:"請問老王的豪華員工旅遊是去哪一個國家?", options:["挪威","瑞典","冰島"], correct:2},
+  {q:"請問酒吧診所的醫生叫什麼名字?", options:["Kevin","David","Jerry"], correct:2},
+  {q:"請問什麼遊戲就是要玩到早上?", options:["星露谷","Minecraft","GTA"], correct:1},
+  {q:"請問在小熊做的噩夢是油條在台上亂講什麼電影的台詞?", options:["冰雪奇緣","無敵破壞王","海洋奇緣"], correct:0},
+  {q:"請問小六說是因為誰抱著，他才敢玩恐怖遊戲?", options:["Fick","八毛","李迅"], correct:0},
+  {q:"請問老王把手肘講成什麼?", options:["手的膝蓋","手踝","手腕"], correct:0},
+  {q:"請問下列哪一個類型的阿嬤沒有出現在鳥屎與小熊等人他們一開始的討論中?", options:["扒手阿嬤","搶劫阿嬤","碰瓷阿嬤"], correct:1},
+  {q:"請問老王說如果修仙的話，她很想學哪個法術?", options:["淨身術","辟谷術","定身術"], correct:0},
+  {q:"李迅問睡覺的八毛去seven要幫忙買什麼嗎，八毛說要買什麼?", options:["彩虹環","飯糰","三明治"], correct:0},
+  {q:"請問 Angelica 是什麼中藥材的英文?", options:["枸杞","生薑","當歸"], correct:2},
+  {q:"請問鳥屎形容Fick長得像什麼中國古典小說的人物?", options:["魯智深","沙悟淨","張飛"], correct:0},
+  {q:"請問當被問到大甲在哪裡時，請問八毛回答什麼縣市?", options:["臺南","南投","宜蘭"], correct:2},
+  {q:"請問老王想去的星座批鬥大會open-mic是要批鬥哪個星座?", options:["牡羊","巨蟹","天蠍"], correct:0},
+  {q:"請問下列哪個人跟八毛同一天生日?", options:["空之英秋","聖結石","J·K·羅琳"], correct:1},
+  {q:"聽到有人會割開坐墊性侵機車，小六說要放什麼東西在坐墊裡?", options:["針","鉛塊","波羅麵包"], correct:1},
+  {q:"請問如果可以的話，老王最想變成什麼家電?", options:["電視","冰箱","微波爐"], correct:2},
+  {q:"請問下列哪個人不是鳥屎?", options:["拍昆蟲廣告的人","蝦愛橘子","在廁所抽衛生紙的人"], correct:2},
+  {q:"請問2016年鳥屎家的附近有一個什麼公園?", options:["卡蒂狗公園","伊布公園","卡比獸公園"], correct:0},
+  {q:"請問老王的哥哥開的飲料店是什麼品牌?", options:["圓石禪飲","清玉","英國藍"], correct:0}
+];
+
+/* =========================================================
+   狀態
+   ========================================================= */
+const START_BATTERY = 5;
+const MAX_BATTERY = 10;
+const MAX_QUESTIONS = 10;
+const TYPE_SPEED = 100; // 打字機速度：加快1.1倍 => 110/1.1 = 100ms
+
+let battery = START_BATTERY;
+let roundIndex = 0;
+let allyPool = [], enemyPool = [], questionPool = [];
+let specialRoundSet = new Set();
+let forcedSpecialNext = false;
+let locked = false;
+let skipRequested = false;
+let currentAbort = null;
+const bgmEl = document.getElementById('cg-bgm');
+
+const logWrap = document.getElementById('cg-log-wrap');
+const batteryRow = document.getElementById('cg-battery-row');
+const batteryEl = document.getElementById('cg-battery');
+const batteryCountEl = document.getElementById('cg-battery-count');
+const qaArea = document.getElementById('cg-qa-area');
+const qNumEl = document.getElementById('cg-q-num');
+const qTextEl = document.getElementById('cg-q-text');
+const optionsEl = document.getElementById('cg-qa-options');
+
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function drawOne(pool){
+  const idx = Math.floor(Math.random() * pool.length);
+  return pool.splice(idx, 1)[0];
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- 終端機日誌：逐字打字機效果（支援分段上色） ---------- */
+function typeLine(speaker, content){
+  const segments = typeof content === 'string' ? [{text:content, cls:null}] : content;
+  const fullText = segments.map(s => s.text).join('');
+  return new Promise(resolve => {
+    const line = document.createElement('p');
+    line.className = 'log-line';
+    const spkSpan = document.createElement('span');
+    spkSpan.className = 'spk-' + speaker;
+    spkSpan.textContent = speaker + '：';
+    const contentSpan = document.createElement('span');
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    line.appendChild(spkSpan);
+    line.appendChild(contentSpan);
+    line.appendChild(cursor);
+    logWrap.appendChild(line);
+    logWrap.scrollTop = logWrap.scrollHeight;
+
+    let timer = null;
+    currentAbort = () => {
+      if (timer) clearInterval(timer);
+      line.remove();
+      currentAbort = null;
+      resolve();
+    };
+
+    if (fullText.length === 0){
+      cursor.remove();
+      currentAbort = null;
+      setTimeout(resolve, 500);
+      return;
+    }
+
+    let revealed = 0;
+    timer = setInterval(() => {
+      revealed++;
+      let html = '';
+      let remaining = revealed;
+      for (const seg of segments){
+        if (remaining <= 0) break;
+        const take = Math.min(remaining, seg.text.length);
+        const portion = escapeHtml(seg.text.slice(0, take));
+        html += seg.cls ? `<span class="${seg.cls}">${portion}</span>` : portion;
+        remaining -= take;
+      }
+      contentSpan.innerHTML = html;
+      logWrap.scrollTop = logWrap.scrollHeight;
+      if (revealed >= fullText.length){
+        clearInterval(timer);
+        cursor.remove();
+        currentAbort = null;
+        setTimeout(resolve, 500);
+      }
+    }, TYPE_SPEED);
+  });
+}
+
+function showBanner(text, type){
+  return new Promise(resolve => {
+    const banner = document.createElement('div');
+    banner.className = 'center-banner ' + type;
+    const span = document.createElement('span');
+    span.textContent = text;
+    banner.appendChild(span);
+    document.getElementById('cg-game-screen').appendChild(banner);
+    setTimeout(() => {
+      banner.remove();
+      resolve();
+    }, 1800);
+  });
+}
+
+/* ---------- 電池渲染 ---------- */
+function renderBattery(pulseIndex){
+  batteryEl.innerHTML = '';
+  for (let i = 0; i < MAX_BATTERY; i++){
+    const cell = document.createElement('div');
+    cell.className = 'cell' + (i < battery ? ' on' : '');
+    if (pulseIndex !== undefined && i === pulseIndex) cell.classList.add('pulse');
+    batteryEl.appendChild(cell);
+  }
+  batteryCountEl.textContent = battery + '/' + MAX_BATTERY;
+}
+
+/* ---------- 亂碼效果（特殊題用） ---------- */
+const SCRAMBLE_CHARS = "阿卡沙塔那哈瑪拉哇ｱｲｳｴｵ①②③#%&*0123456789";
+function randomScramble(len){
+  let s = '';
+  for (let i = 0; i < len; i++){
+    s += SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+  }
+  return s;
+}
+
+/* =========================================================
+   回合流程
+   ========================================================= */
+function pickSpecialRounds(){
+  // 從最多 MAX_QUESTIONS 個回合中，隨機挑 2 個當特殊題（實際回合數以資源池較小者為準）
+  const totalRounds = Math.min(MAX_QUESTIONS, enemyPool.length);
+  const indices = shuffle([...Array(totalRounds).keys()]).slice(0, 2);
+  specialRoundSet = new Set(indices);
+}
+
+async function startBattle(){
+  allyPool = ALLY_DATA.slice();
+  enemyPool = ENEMY_DATA.slice();
+  questionPool = QUESTION_DATA.slice();
+  battery = START_BATTERY;
+  roundIndex = 0;
+  forcedSpecialNext = false;
+  pickSpecialRounds();
+
+  batteryRow.hidden = false;
+  qaArea.hidden = false;
+  renderBattery();
+
+  await playRound();
+}
+
+async function playRound(){
+  if (enemyPool.length === 0 || allyPool.length === 0 || questionPool.length === 0){
+    await endLose();
+    return;
+  }
+
+  const isSpecial = forcedSpecialNext || specialRoundSet.has(roundIndex);
+  forcedSpecialNext = false;
+
+  const ally = drawOne(allyPool);
+  const enemy = drawOne(enemyPool);
+  const question = drawOne(questionPool);
+
+  qNumEl.textContent = '第 ' + (roundIndex + 1) + ' / ' + MAX_QUESTIONS + ' 題';
+  qNumEl.classList.toggle('special', isSpecial);
+
+  await typeLine('系統', [
+    {text:'敵人['}, {text:enemy.name, cls:'tok-enemy'}, {text:']來襲'}
+  ]);
+
+  if (isSpecial){
+    await typeLine('ketchupfrog', '我、我好像已經都想不起了');
+  }
+
+  qTextEl.textContent = question.q;
+
+  optionsEl.innerHTML = '';
+  const optButtons = question.options.map((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn' + (isSpecial ? ' scrambled' : '');
+    const tag = document.createElement('span');
+    tag.className = 'opt-tag';
+    tag.textContent = '[' + (idx + 1) + ']';
+    const label = document.createElement('span');
+    label.className = 'opt-label';
+    label.textContent = isSpecial ? randomScramble(opt.length) : opt;
+    btn.appendChild(tag);
+    btn.appendChild(label);
+    btn.addEventListener('click', () => resolveRound(idx, question, ally, enemy, btn, optButtons, isSpecial));
+    optionsEl.appendChild(btn);
+    return { btn, label, real: opt };
+  });
+
+  locked = false;
+
+  if (isSpecial){
+    let scrambleTimer = setInterval(() => {
+      optButtons.forEach(o => { o.label.textContent = randomScramble(o.real.length); });
+    }, 80);
+
+    setTimeout(() => {
+      clearInterval(scrambleTimer);
+      optButtons.forEach((o, i) => {
+        setTimeout(() => {
+          o.label.textContent = o.real;
+          o.btn.classList.remove('scrambled');
+        }, i * 120);
+      });
+    }, 3000);
+  }
+}
+
+async function resolveRound(idx, question, ally, enemy, btnEl, allBtns, wasSpecial){
+  if (locked) return;
+  locked = true;
+  allBtns.forEach(o => { o.btn.disabled = true; });
+
+  const isCorrect = idx === question.correct;
+  if (isCorrect){
+    btnEl.classList.remove('scrambled');
+    btnEl.classList.add('correct');
+    btnEl.querySelector('.opt-label').textContent = allBtns[idx].real;
+  } else {
+    btnEl.classList.remove('scrambled');
+    btnEl.classList.add('wrong');
+    btnEl.querySelector('.opt-label').textContent = allBtns[idx].real;
+    const correctBtn = allBtns[question.correct].btn;
+    correctBtn.classList.remove('scrambled');
+    correctBtn.classList.add('correct');
+    allBtns[question.correct].label.textContent = allBtns[question.correct].real;
+  }
+
+  if (isCorrect && ally.attr === '人'){
+    await typeLine('系統', [
+      {text:'召喚['}, {text:ally.name, cls:'tok-ally'}, {text:']，成功擊退['},
+      {text:enemy.name, cls:'tok-enemy'}, {text:']'}
+    ]);
+    await typeLine('ketchupfrog', '我覺得…… 我的記憶正在慢慢恢復');
+    battery = Math.min(MAX_BATTERY, battery + 1);
+    renderBattery(battery - 1);
+  } else if (isCorrect && ally.attr === '物'){
+    await typeLine('系統', [
+      {text:'獲得['}, {text:ally.name, cls:'tok-ally'}, {text:']，['},
+      {text:enemy.name, cls:'tok-enemy'}, {text:']攻擊無效化'}
+    ]);
+    await typeLine('ketchupfrog', '我覺得…… 我的記憶正在慢慢恢復');
+    battery = Math.min(MAX_BATTERY, battery + 1);
+    renderBattery(battery - 1);
+  } else {
+    await typeLine('系統', '召喚失敗');
+    await typeLine('系統', [
+      {text:'['}, {text:enemy.name, cls:'tok-enemy'}, {text:']對意識體造成傷害，'},
+      {text:enemy.cause, cls:'tok-cause'}
+    ]);
+    await typeLine('ketchupfrog', '啊啊啊……');
+    battery = Math.max(0, battery - 1);
+    renderBattery();
+  }
+
+  await new Promise(r => setTimeout(r, 500));
+
+  if (battery >= MAX_BATTERY){
+    await endWin();
+    return;
+  }
+  if (battery <= 0){
+    await endLose();
+    return;
+  }
+
+  roundIndex++;
+  if (roundIndex >= MAX_QUESTIONS){
+    await endLose();
+    return;
+  }
+
+  if (battery < 3) forcedSpecialNext = true;
+
+  await playRound();
+}
+
+/* =========================================================
+   結局
+   ========================================================= */
+async function endWin(){
+  bgmEl.pause();
+  bgmEl.currentTime = 0;
+  qaArea.hidden = true;
+  batteryRow.hidden = true;
+  await showBanner('威脅消失', 'info');
+  const lines = [
+    '看來應該是結束了', '我感覺……', '我的記憶已經全部恢復了',
+    '我的名字、我的家', '我hololive推的是', 'Sakura Miko',
+    '我漸漸能感受到我的心臟在跳動了', '我好像漸漸能摸到這個世界',
+    '這代表我終於快要離開這裡了', '謝謝你', '真的謝謝你',
+    '我終於可以回到現實世界了', '希望我們哪天能真正的見面', '再見'
+  ];
+  for (const l of lines) await typeLine('ketchupfrog', l);
+  await new Promise(r => setTimeout(r, 600));
+  document.getElementById('cg-game-screen').hidden = true;
+  document.getElementById('cg-win-screen').hidden = false;
+}
+
+async function endLose(){
+  bgmEl.pause();
+  bgmEl.currentTime = 0;
+  qaArea.hidden = true;
+  batteryRow.hidden = true;
+  await showBanner('偵測到故障，正在排除……', 'danger');
+  const lines = [
+    ['ketchupfrog', '還是不行嗎?'],
+    ['ketchupfrog', '沒關係你已經盡力了'],
+    ['ketchupfrog', '這本來就是放手一搏'],
+    ['系統', '5'],
+    ['ketchupfrog', '我用最後的記憶'],
+    ['系統', '4'],
+    ['ketchupfrog', '能跟你們一起'],
+    ['系統', '3'],
+    ['ketchupfrog', '每天出題'],
+    ['系統', '2'],
+    ['ketchupfrog', '我很快樂'],
+    ['系統', '1'],
+    ['ketchupfrog', '謝謝，再見'],
+    ['系統', '0'],
+    ['系統', '故障已排除']
+  ];
+  for (const [spk, txt] of lines) await typeLine(spk, txt);
+  await new Promise(r => setTimeout(r, 600));
+  document.getElementById('cg-game-screen').hidden = true;
+  document.getElementById('cg-lose-screen').hidden = false;
+}
+
+/* ---------- 假的「重新連線」按鈕（劇情梗，不會真的重來） ---------- */
+async function fakeRestart(fromScreenId){
+  document.getElementById(fromScreenId).hidden = true;
+  document.getElementById('cg-game-screen').hidden = false;
+  logWrap.innerHTML = '';
+  await typeLine('error', 'error:無法找到指定目標');
+  await new Promise(r => setTimeout(r, 500));
+  document.getElementById('cg-game-screen').hidden = true;
+  document.getElementById(fromScreenId).hidden = false;
+}
+document.getElementById('cg-restart-btn-win').addEventListener('click', () => fakeRestart('win-screen'));
+document.getElementById('cg-restart-btn-lose').addEventListener('click', () => fakeRestart('lose-screen'));
+
+/* =========================================================
+   開場劇情
+   ========================================================= */
+async function playIntro(){
+  const skipBtn = document.getElementById('cg-skip-btn');
+  skipBtn.hidden = false;
+  skipRequested = false;
+
+  const introLines1 = [
+    "你好，陌生人", "我是ketchupfrog", "你也可以叫我番茄醬蛙",
+    "我就是在threads上每天po LNG 問答的那個人",
+    "這應該是我們第一次在threads以外的地方見面",
+    "我現在也", "只能以這樣的形式跟你對話", "……",
+    "2026年1月10號", "我醒來時就感受不到我的身體",
+    "意識彷彿漂浮在空間中", "我能感覺到萬物觸碰到我的意識",
+    "但又毫不保留地穿透過去",
+    "我花了一點時間才熟悉這個網路虛擬世界的操作方式",
+    "但我的記憶卻幾乎消失", "我的真實姓名、我住在哪裡、",
+    "我hololive主推是誰", "這些資訊……", "我一個字都想不起來",
+    "唯一記得的只有LNG的精華內容", "還有我曾是人類這件事",
+    "因此，我在threads創了一個專門po LNG問答的帳號",
+    "為了找到能夠幫助我找回記憶的人", "而你，我的朋友",
+    "是通過種種測驗而來到這裡的被選中之人",
+    "幸好，你來得還不算晚", "我已經再這個世界待太久了", "*在",
+    "維持這個意識越來越吃力了", "我能感受到",
+    "我的記憶正在凋零", "要被這個世界給奪走了",
+    "我唯一的希望就只有你了"
+  ];
+  for (const l of introLines1){
+    if (skipRequested) break;
+    await typeLine('ketchupfrog', l);
+  }
+
+  skipBtn.hidden = true;
+  skipRequested = false;
+
+  await showBanner('偵測到入侵者', 'danger');
+
+  const introLines2 = ["來了，他們來了", "拜託你", "喚醒我的記憶吧"];
+  for (const l of introLines2) await typeLine('ketchupfrog', l);
+
+  await new Promise(r => setTimeout(r, 400));
+  bgmEl.currentTime = 0;
+  bgmEl.play().catch(() => {}); // 音樂檔還沒放進資料夾時，播放會失敗但不影響遊戲進行
+  await startBattle();
+}
+
+document.getElementById('cg-skip-btn').addEventListener('click', () => {
+  skipRequested = true;
+  if (currentAbort) currentAbort();
+});
+
+document.getElementById('cg-start-btn').addEventListener('click', () => {
+  document.getElementById('cg-start-screen').hidden = true;
+  document.getElementById('cg-game-screen').hidden = false;
+  playIntro();
+});
+
+})();
+</script>
 </body>
 </html>
